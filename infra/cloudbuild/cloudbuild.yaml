@@ -64,10 +64,11 @@ steps:
     waitFor: ["build-evaluator"]
 
   # --- Evaluation gate: fail the build if quality regresses ---
+  # Must wait for the image to be pushed (steps pull from Artifact Registry).
   - id: eval-gate
     name: "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"
     args: ["--dataset", "/app/datasets/eval_set.jsonl", "--threshold", "0.8"]
-    waitFor: ["build-evaluator"]
+    waitFor: ["push-evaluator"]
 
   # --- Run tests (unit tests per service, in parallel) ---
   - id: test-python
