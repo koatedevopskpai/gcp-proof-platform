@@ -28,3 +28,9 @@ resource "google_project_iam_member" "cloudbuild_iam_sa_user" {
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${local.cloudbuild_sa}"
 }
+
+resource "google_project_iam_member" "cloudbuild_storage_viewer" {
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${local.cloudbuild_sa}"
+}
