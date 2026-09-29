@@ -1,0 +1,26 @@
+project_id        = "gcp-proof-platform"
+billing_account_id = "01FBBE-ACD618-CFA5D6"
+region            = "us-central1"
+zone              = "us-central1-a"
+environment       = "dev"
+instance_type     = "e2-small"
+root_volume_size  = 30
+repo_url          = "https://github.com/koatedevopskpai/gcp-proof-platform.git"
+ssh_cidr          = ["0.0.0.0/0"]
+
+# GKE is OPTIONAL and ephemeral - keep false for the $20 always-on budget
+enable_gke      = false
+enable_scheduler = true
+
+# FinOps tagging taxonomy
+cost_center          = "cc-gcp-platform"
+business_unit        = "data-platform"
+tag_owner            = "koatekpai"
+budget_owner         = "platform-leads"
+workload             = "gcp-proof-platform"
+cost_category        = "engineering-rnd"
+data_classification  = "public-reference"
+
+# Budget guardrail (hard $20/month)
+budget_limit_gbp = 15
+budget_alerts_email = "koatekpai@outlook.com"

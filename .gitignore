@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / TypeScript
+node_modules/
+dist/
+*.tsbuildinfo
+.npm/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+TestResults/
+
+# Terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate*
+infra/terraform/**/*.tfvars
+!infra/terraform/**/*.tfvars.example
+infra/terraform/**/crash.log
+
+# GCP / gcloud
+.env
+*.json  # keep local keys/service-account files out (except tracked schema)
+!infra/terraform/**/schemas/*.json
+!mlops/model-registry/*.json
+
+# Helm
+infra/helm/**/charts/*.tgz
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local dev docs
+*CODE-ALONG*.txt

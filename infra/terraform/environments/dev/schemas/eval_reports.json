@@ -1,0 +1,11 @@
+[
+  { "name": "report_date", "type": "DATE", "mode": "REQUIRED" },
+  { "name": "question", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "map_4", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "ndcg_4", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "rouge_l", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "faithfulness", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "answer_relevancy", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "aggregate_score", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "passed", "type": "BOOL", "mode": "NULLABLE" }
+]

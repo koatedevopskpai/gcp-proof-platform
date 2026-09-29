@@ -1,0 +1,100 @@
+# gcp-proof-platform Cloud Build pipeline:
+#   build all images -> push to Artifact Registry -> run tests -> run eval gate
+# Trigger via Cloud Build trigger (github push to main) or:
+#   gcloud builds submit --config infra/cloudbuild/cloudbuild.yaml --substitutions=_TAG=<sha>
+substitutions:
+  _REGION: "us-central1"
+  _REPO: "ai-platform"
+  _TAG: "latest"
+
+steps:
+  # --- Build + push the 4 interactive services ---
+  - id: build-gateway
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/gateway:${_TAG}
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/gateway:latest
+      - services/gateway
+  - id: push-gateway
+    name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/gateway:${_TAG}"]
+    waitFor: ["build-gateway"]
+
+  - id: build-rag-api
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/rag-api:${_TAG}
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/rag-api:latest
+      - services/rag-api
+  - id: push-rag-api
+    name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/rag-api:${_TAG}"]
+    waitFor: ["build-rag-api"]
+
+  - id: build-dotnet-ingest
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/dotnet-ingest:${_TAG}
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/dotnet-ingest:latest
+      - services/dotnet-ingest
+  - id: push-dotnet-ingest
+    name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/dotnet-ingest:${_TAG}"]
+    waitFor: ["build-dotnet-ingest"]
+
+  - id: build-evaluator
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}
+      - services/evaluator
+  - id: push-evaluator
+    name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"]
+    waitFor: ["build-evaluator"]
+
+  # --- Evaluation gate: fail the build if quality regresses ---
+  - id: eval-gate
+    name: "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"
+    args: ["--dataset", "/app/datasets/eval_set.jsonl", "--threshold", "0.8"]
+    waitFor: ["build-evaluator"]
+
+  # --- Run tests (unit tests per service, in parallel) ---
+  - id: test-python
+    name: "python:3.12"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        pip install -q -r services/rag-api/requirements-dev.txt -r services/evaluator/requirements-dev.txt
+        python -m pytest services/rag-api/tests services/evaluator/tests -q
+    waitFor: ["-"]
+  - id: test-node
+    name: "node:22"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        cd services/gateway && npm ci --silent && npm run typecheck && npm run build && npm test
+    waitFor: ["-"]
+  - id: test-dotnet
+    name: "mcr.microsoft.com/dotnet/sdk:8.0"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        cd services/dotnet-ingest && dotnet test IngestApi.sln -c Release
+    waitFor: ["-"]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
