@@ -46,6 +46,30 @@ variable "bq_location" {
   default = "US"
 }
 
+variable "vpc_cidr" {
+  description = "CIDR for the platform VPC app subnet"
+  type        = string
+  default     = "10.0.0.0/24"
+}
+
+variable "enable_vpc_sc" {
+  description = "Apply VPC Service Controls perimeter (REQUIRES an organization; standalone accounts cannot use VPC-SC)"
+  type        = bool
+  default     = false
+}
+
+variable "enable_psc" {
+  description = "Create the Private Service Connect endpoint to Google APIs (documented pattern; some environments reject the all-apis target via Terraform)"
+  type        = bool
+  default     = false
+}
+
+variable "organization_id" {
+  description = "GCP organization id for VPC Service Controls (leave empty for standalone accounts)"
+  type        = string
+  default     = ""
+}
+
 variable "enable_gke" {
   description = "Provision the optional (ephemeral) GKE cluster - NOT part of the $20 always-on budget"
   type        = bool

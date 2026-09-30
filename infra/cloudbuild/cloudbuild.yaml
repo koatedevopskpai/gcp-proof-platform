@@ -1,5 +1,6 @@
-# gcp-proof-platform Cloud Build pipeline:
-#   build all images -> push to Artifact Registry -> run tests -> run eval gate
+# gcp-proof-platform Cloud Build pipeline (DevSecOps):
+#   build all images -> push to Artifact Registry -> Checkov (IaC) ->
+#   Trivy (images) -> SBOM -> eval gate -> unit tests
 # Trigger via Cloud Build trigger (github push to main) or:
 #   gcloud builds submit --config infra/cloudbuild/cloudbuild.yaml --substitutions=_TAG=<sha>
 substitutions:
@@ -63,8 +64,46 @@ steps:
     args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"]
     waitFor: ["build-evaluator"]
 
+  # --- DevSecOps: policy-as-code (Checkov) on the Terraform ---
+  - id: checkov-iac
+    name: "bridgecrew/checkov:latest"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        checkov -d infra/terraform --framework terraform --quiet --compact 2>&1 | tee /workspace/checkov.log
+        rc=${PIPESTATUS[0]}
+        if [ $rc -ne 0 ] && grep -Eq 'HIGH|CRITICAL' /workspace/checkov.log; then
+          echo "CHECKOV FAILED: HIGH/CRITICAL IaC findings"
+          exit 1
+        fi
+        echo "checkov: no HIGH/CRITICAL findings"
+    waitFor: ["-"]
+
+  # --- DevSecOps: Trivy container scans + SBOM generation ---
+  - id: trivy-scan
+    name: "aquasec/trivy:latest"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        mkdir -p /workspace/sbom
+        TOKEN=$(curl -sfH "Metadata-Flavor: Google" \
+          "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+          | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
+        for img in gateway rag-api dotnet-ingest evaluator; do
+          IMAGE=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/$${img}:${_TAG}
+          echo "== scanning $${img} =="
+          trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed --no-progress \
+            --username oauth2accesstoken --password "$$TOKEN" "$${IMAGE}" || exit 1
+          trivy image --format spdx --no-progress \
+            --username oauth2accesstoken --password "$$TOKEN" \
+            --output /workspace/sbom/$${img}.spdx.json "$${IMAGE}" || exit 1
+        done
+        echo "trivy: no HIGH/CRITICAL findings; SBOMs written"
+    waitFor: ["push-gateway", "push-rag-api", "push-dotnet-ingest", "push-evaluator"]
+
   # --- Evaluation gate: fail the build if quality regresses ---
-  # Must wait for the image to be pushed (steps pull from Artifact Registry).
   - id: eval-gate
     name: "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"
     args: ["--dataset", "/app/datasets/eval_set.jsonl", "--threshold", "0.8"]
@@ -96,6 +135,13 @@ steps:
       - |
         cd services/dotnet-ingest && dotnet test IngestApi.sln -c Release
     waitFor: ["-"]
+
+# Upload the generated SBOMs as build artifacts.
+artifacts:
+  objects:
+    location: "gs://$PROJECT_ID_cloudbuild/sbom/${_TAG}"
+    paths:
+      - "/workspace/sbom/*.spdx.json"
 
 options:
   logging: CLOUD_LOGGING_ONLY

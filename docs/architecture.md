@@ -36,12 +36,46 @@ startup script (`startup.sh.tftpl`).
 
 ## CI/CD (Cloud Build)
 
-`infra/cloudbuild/cloudbuild.yaml`:
+`infra/cloudbuild/cloudbuild.yaml` is a **DevSecOps** pipeline:
 1. Build + push gateway, rag-api, dotnet-ingest, evaluator → Artifact Registry.
-2. **Evaluation gate**: run the evaluator image; fail if aggregate < 0.80.
-3. Unit tests for all three languages run in parallel.
-Cloud Build SA is granted `artifactregistry.writer` + `run.admin` in
-`cloudbuild_iam.tf`.
+2. **Checkov** (policy-as-code) on `infra/terraform` — fails the build on HIGH/CRITICAL IaC findings.
+3. **Trivy** container scans — `--exit-code 1` on HIGH/CRITICAL in any image.
+4. **SBOM generation** (`trivy image --format spdx`) uploaded as build artifacts.
+5. **Evaluation gate**: run the evaluator image; fail if aggregate < 0.80.
+6. Unit tests for all three languages run in parallel.
+Cloud Build SA is granted `artifactregistry.writer`, `run.admin`, `storage.objectViewer`,
+`logging.logWriter` in `cloudbuild_iam.tf`.
+
+## Networking & security hardening
+
+- **Custom VPC + subnets** (`networking.tf`) — the always-on VM and (optional) GKE run on a
+  dedicated platform VPC with a `pods`/`services` secondary range, **private Google access**
+  enabled (no public IP needed for API egress) and hardened firewalls.
+- **Private Service Connect** — an internal PSC endpoint to the `all-apis` Google API
+  service attachment for private access to Google services. Provided in `networking.tf`
+  behind `enable_psc` (default off): the GCP API rejects the bare `all-apis`
+  forwarding-rule target via Terraform in some environments, so it ships as a guarded,
+  documented pattern rather than a dependency of the always-on stack.
+- **Workload Identity Federation** (`wif.tf`) — a Workload Identity Pool + GitHub OIDC
+  provider so GitHub Actions impersonates a least-privilege CI service account
+  (`github-ci`) **without** service-account keys.
+- **VPC Service Controls** (`vpcsc.tf`) — a data-perimeter access policy + service
+  perimeter, **org-guarded** (`enable_vpc_sc`/`organization_id`). VPC-SC requires an
+  organization, so it ships correct-and-ready but is disabled in this standalone account.
+- **Cloud NAT** — deliberately NOT deployed (see below).
+
+> **Cloud NAT** is documented as a pattern for private-only workloads but intentionally
+> not deployed: it carries a flat hourly fee (~$9–35/mo) even when idle, which would push
+> the always-on stack over the $20 budget, and the always-on VM egresses via its public IP
+> anyway. Enable `google_compute_router_nat` on this VPC when running private-only
+> workloads (e.g. GKE nodes without public IPs).
+
+## Monitoring & observability
+
+- `google_monitoring_service` + **availability SLO** (99% / 30 days).
+- **Error-budget burn alert** (MQL) → pages the budget notification channel.
+- **Ops dashboard** for gateway availability + latency.
+- Cloud Logging enabled by default; the BigQuery eval pipeline feeds `eval_reports`.
 
 ## FinOps
 
@@ -60,5 +94,7 @@ Cloud Build SA is granted `artifactregistry.writer` + `run.admin` in
   public demo URL.
 - Cloud Run job uses a dedicated least-privilege SA (`eval_sa`) with only
   `bigquery.dataEditor` + `run.invoker`.
+- CI authenticates via **Workload Identity Federation** (no keys); IaC + image scans
+  (Checkov/Trivy) gate the pipeline; SBOMs are generated per build.
 - Secrets via environment/metadata; `.env` and `*.json` local keys gitignored.
 - Startup script clones a **public** repo — no credentials baked into the VM.
