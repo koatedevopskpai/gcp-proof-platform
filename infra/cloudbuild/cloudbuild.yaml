@@ -67,17 +67,19 @@ steps:
   # --- DevSecOps: policy-as-code (Checkov) on the Terraform ---
   - id: checkov-iac
     name: "bridgecrew/checkov:latest"
-    entrypoint: "sh"
+    entrypoint: "bash"
     args:
       - "-c"
       - |
-        checkov -d infra/terraform --framework terraform --quiet --compact 2>&1 | tee /workspace/checkov.log
-        rc=${PIPESTATUS[0]}
+        set +e
+        checkov -d infra/terraform --framework terraform --quiet --compact > /workspace/checkov.log 2>&1
+        rc=$?
         if [ $rc -ne 0 ] && grep -Eq 'HIGH|CRITICAL' /workspace/checkov.log; then
           echo "CHECKOV FAILED: HIGH/CRITICAL IaC findings"
+          cat /workspace/checkov.log
           exit 1
         fi
-        echo "checkov: no HIGH/CRITICAL findings"
+        echo "checkov: no HIGH/CRITICAL findings (rc=$rc)"
     waitFor: ["-"]
 
   # --- DevSecOps: Trivy container scans + SBOM generation ---
@@ -139,7 +141,7 @@ steps:
 # Upload the generated SBOMs as build artifacts.
 artifacts:
   objects:
-    location: "gs://$PROJECT_ID_cloudbuild/sbom/${_TAG}"
+    location: "gs://${PROJECT_ID}_cloudbuild/sbom/${_TAG}"
     paths:
       - "/workspace/sbom/*.spdx.json"
 
