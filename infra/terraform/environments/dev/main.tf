@@ -60,7 +60,8 @@ resource "google_compute_instance" "app" {
   }
 
   network_interface {
-    network = "default"
+    network    = google_compute_network.vpc.id
+    subnetwork = google_compute_subnetwork.app.id
     access_config {
       nat_ip = google_compute_address.app.address
     }
@@ -69,6 +70,9 @@ resource "google_compute_instance" "app" {
   metadata_startup_script = templatefile("${path.module}/startup.sh.tftpl", {
     repo_url = var.repo_url
   })
+
+  # Allow the provider to stop the instance when the network changes.
+  allow_stopping_for_update = true
 
   service_account {
     scopes = ["cloud-platform"]
@@ -80,28 +84,4 @@ resource "google_compute_instance" "app" {
     workload    = var.workload
     cost_center = var.cost_center
   }
-}
-
-resource "google_compute_firewall" "app_ingress" {
-  name    = "gcp-proof-platform-${var.environment}-app"
-  network = "default"
-
-  allow {
-    protocol = "tcp"
-    ports    = ["3002", "8010", "8080"]
-  }
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["gcp-proof-platform-app"]
-}
-
-resource "google_compute_firewall" "app_ssh" {
-  name    = "gcp-proof-platform-${var.environment}-ssh"
-  network = "default"
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-  source_ranges = var.ssh_cidr
-  target_tags   = ["gcp-proof-platform-app"]
 }

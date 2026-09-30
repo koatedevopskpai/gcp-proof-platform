@@ -12,6 +12,15 @@ resource "google_container_cluster" "primary" {
   name     = "gcp-proof-platform-${var.environment}"
   location = var.region
 
+  network    = google_compute_network.vpc.id
+  subnetwork = google_compute_subnetwork.app.id
+
+  # Pods/services use the VPC secondary ranges.
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
+
   initial_node_count = 1
 
   node_config {

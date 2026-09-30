@@ -35,9 +35,13 @@ companion to the AWS `ai-platform-proof` project.
 | **Compute Engine** | Always-on `e2-small` VM running the full stack (`infra/terraform/.../main.tf`) |
 | **Cloud Run** | `eval-to-bq` job that runs the MLOps eval gate and loads reports into BigQuery |
 | **BigQuery** | `ai_platform.eval_reports` dataset/table + loader pipeline (`mlops/bigquery`) |
-| **GKE + Helm** | Optional module (`gke.tf`) + charts (`infra/helm`) — spin up for demos |
+| **GKE + Helm** | Optional module (`gke.tf`, on the hardened VPC) + charts (`infra/helm`) — spin up for demos |
 | **Terraform** | Entire GCP footprint, `default_labels` FinOps taxonomy |
-| **Cloud Build / DevOps** | `infra/cloudbuild/cloudbuild.yaml` — build → push → test → eval gate |
+| **Cloud Build / DevSecOps** | `infra/cloudbuild/cloudbuild.yaml` — build → push → **Checkov (IaC)** → **Trivy (images)** → **SBOM** → eval gate → tests |
+| **Networking** | Custom VPC + subnets + private Google access + **Private Service Connect** (`networking.tf`) |
+| **Identity** | **Workload Identity Federation** for GitHub Actions (`wif.tf`) |
+| **Observability** | Availability **SLO**, error-budget alert, ops dashboard (`monitoring.tf`) |
+| **Data perimeter** | **VPC Service Controls** module, org-guarded (`vpcsc.tf`) |
 | **FinOps** | Every resource labelled (`cost_center`, `workload`, `budget_owner`, ...) + **$20/mo budget** with 80%/100% alerts |
 
 ## Cost model (us-central1, always-on)
@@ -48,8 +52,13 @@ companion to the AWS `ai-platform-proof` project.
 | Cloud Run job (daily) + Cloud Scheduler | ~1 |
 | BigQuery (small eval pipeline) | ~1 |
 | Artifact Registry (few GB) | ~0.50 |
+| VPC / subnets / PSC / WIF / VPC-SC / Monitoring | $0 |
 | Cloud Build / Monitoring (free tier) | 0 |
 | **Total** | **~14** — within the hard **$20** budget |
+
+> **Cloud NAT** is intentionally NOT deployed (flat ~$9–35/mo even when idle would
+> break the cap; the VM egresses via its public IP). Documented as a pattern in
+> `docs/architecture.md` for private-only workloads.
 
 GKE management fee (~$73/mo) is intentionally **excluded** — GKE is on-demand only
 (`enable_gke = true` → demo → `false`).
