@@ -82,6 +82,18 @@ steps:
         echo "checkov: no HIGH/CRITICAL findings (rc=$rc)"
     waitFor: ["-"]
 
+  # --- DevSecOps: authenticate to Artifact Registry for image scans ---
+  - id: docker-login
+    name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker login -u oauth2accesstoken \
+          -p "$(gcloud auth print-access-token)" \
+          https://${_REGION}-docker.pkg.dev
+    waitFor: ["push-gateway", "push-rag-api", "push-dotnet-ingest", "push-evaluator"]
+
   # --- DevSecOps: Trivy container scans + SBOM generation ---
   - id: trivy-scan
     name: "aquasec/trivy:latest"
@@ -90,20 +102,15 @@ steps:
       - "-c"
       - |
         mkdir -p /workspace/sbom
-        TOKEN=$(curl -sfH "Metadata-Flavor: Google" \
-          "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
-          | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
         for img in gateway rag-api dotnet-ingest evaluator; do
           IMAGE=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/$${img}:${_TAG}
           echo "== scanning $${img} =="
-          trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed --no-progress \
-            --username oauth2accesstoken --password "$$TOKEN" "$${IMAGE}" || exit 1
+          trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed --no-progress "$${IMAGE}" || exit 1
           trivy image --format spdx --no-progress \
-            --username oauth2accesstoken --password "$$TOKEN" \
             --output /workspace/sbom/$${img}.spdx.json "$${IMAGE}" || exit 1
         done
         echo "trivy: no HIGH/CRITICAL findings; SBOMs written"
-    waitFor: ["push-gateway", "push-rag-api", "push-dotnet-ingest", "push-evaluator"]
+    waitFor: ["docker-login"]
 
   # --- Evaluation gate: fail the build if quality regresses ---
   - id: eval-gate
