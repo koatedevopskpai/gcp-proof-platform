@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+# Pull patched base packages so the Trivy HIGH/CRITICAL gate passes
+# (perl-base CVEs fixed in debian bookworm updates).
+RUN apt-get update && apt-get -y upgrade && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY services/evaluator/requirements.txt ./eval-requirements.txt

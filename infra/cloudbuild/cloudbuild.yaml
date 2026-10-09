@@ -64,6 +64,27 @@ steps:
     args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/evaluator:${_TAG}"]
     waitFor: ["build-evaluator"]
 
+  - id: build-eval-to-bq
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/eval-to-bq:${_TAG}
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/eval-to-bq:latest
+      - -f
+      - mlops/bigquery/Dockerfile
+      - .
+  - id: push-eval-to-bq
+    name: "gcr.io/cloud-builders/docker"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        docker push ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/eval-to-bq:${_TAG}
+        docker push ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/eval-to-bq:latest
+    waitFor: ["build-eval-to-bq"]
+
   # --- DevSecOps: policy-as-code (Checkov) on the Terraform ---
   - id: checkov-iac
     name: "bridgecrew/checkov:latest"
@@ -90,7 +111,7 @@ steps:
       - "-c"
       - |
         gcloud auth print-access-token > /workspace/ar-token
-    waitFor: ["push-gateway", "push-rag-api", "push-dotnet-ingest", "push-evaluator"]
+    waitFor: ["push-gateway", "push-rag-api", "push-dotnet-ingest", "push-evaluator", "push-eval-to-bq"]
 
   # --- DevSecOps: Trivy container scans + SBOM generation ---
   - id: trivy-scan
@@ -101,7 +122,7 @@ steps:
       - |
         mkdir -p /workspace/sbom
         TOKEN=$(cat /workspace/ar-token)
-        for img in gateway rag-api dotnet-ingest evaluator; do
+        for img in gateway rag-api dotnet-ingest evaluator eval-to-bq; do
           IMAGE=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/$${img}:${_TAG}
           echo "== scanning $${img} =="
           trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed --no-progress \
