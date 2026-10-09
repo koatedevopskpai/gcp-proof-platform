@@ -12,7 +12,8 @@ resource "google_bigquery_dataset" "ai_platform" {
 }
 
 resource "google_bigquery_table" "eval_reports" {
-  dataset_id = google_bigquery_dataset.ai_platform.dataset_id
-  table_id   = "eval_reports"
-  schema     = file("${path.module}/schemas/eval_reports.json")
+  dataset_id           = google_bigquery_dataset.ai_platform.dataset_id
+  table_id             = "eval_reports"
+  deletion_protection  = false
+  schema               = file("${path.module}/schemas/eval_reports.json")
 }

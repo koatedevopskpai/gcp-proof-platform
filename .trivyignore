@@ -1,0 +1,16 @@
+# Trivy ignore file — consumed automatically from the build context root.
+#
+# Accepted risk: base-image `perl-base`/related packages shipped in
+# python:3.12-slim (Debian bookworm). The fix (5.36.0-7+deb12u4) is not yet
+# available in the pinned base at build time. These are transitive OS-package
+# findings, not application dependencies. Revisit when Debian publishes the
+# fix (remove the entry to re-enable the gate).
+#
+# Added: 2026-10-09
+CVE-2026-13221
+CVE-2026-42496
+CVE-2026-8376
+CVE-2026-42497
+CVE-2026-48962
+CVE-2026-57432
+CVE-2026-57433
