@@ -20,6 +20,13 @@ resource "google_project_iam_member" "eval_run_invoker" {
   member  = "serviceAccount:${google_service_account.eval_sa.email}"
 }
 
+# Without this the job's container cannot pull the image from Artifact Registry.
+resource "google_project_iam_member" "eval_ar_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${google_service_account.eval_sa.email}"
+}
+
 resource "google_cloud_run_v2_job" "eval_to_bq" {
   name     = "eval-to-bq"
   location = var.region
