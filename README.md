@@ -1,9 +1,9 @@
 # GCP Proof Platform
 
-**Production-grade GCP Platform/DevOps reference implementation** — a public,
-NDA-proof demonstration of Google Cloud Platform engineering: Compute Engine,
-Cloud Run, BigQuery, Artifact Registry, Cloud Build CI/CD, optional GKE + Helm,
-all FinOps-labelled and capped at a **$20/month budget**.
+**GCP Platform/DevOps reference implementation** — a public demonstration of
+Google Cloud Platform engineering: Compute Engine, Cloud Run, BigQuery,
+Artifact Registry, Cloud Build CI/CD, optional GKE + Helm, all FinOps-labelled
+with **80% and 100% alerts** against a **$20/month budget**.
 
 Built to support a **GCP DevOps / Platform Engineer** application — the GCP-native
 companion to the AWS `ai-platform-proof` project.
@@ -23,7 +23,7 @@ companion to the AWS `ai-platform-proof` project.
    │ Cloud Scheduler ─▶ Cloud Run job (eval-to-bq) ─▶ BigQuery  │
    │ Cloud Build CI/CD: build → push → test → eval gate         │
    │ Artifact Registry: container images                        │
-   │ Cloud Billing Budget: hard $20/mo, label-scoped, alerts    │
+   │ Cloud Billing Budget: $20/mo, label-scoped, alerts         │
    │ GKE + Helm (OPTIONAL, ephemeral, disabled by default)      │
    └────────────────────────────────────────────────────────────┘
 ```
@@ -54,7 +54,7 @@ companion to the AWS `ai-platform-proof` project.
 | Artifact Registry (few GB) | ~0.50 |
 | VPC / subnets / PSC / WIF / VPC-SC / Monitoring | $0 |
 | Cloud Build / Monitoring (free tier) | 0 |
-| **Total** | **~14** — within the hard **$20** budget |
+| **Total** | **~14** — within the **$20** budget |
 
 > **Cloud NAT** is intentionally NOT deployed (flat ~$9–35/mo even when idle would
 > break the cap; the VM egresses via its public IP). Documented as a pattern in

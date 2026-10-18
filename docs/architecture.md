@@ -2,10 +2,10 @@
 
 ## Goals
 
-1. Demonstrate GCP DevOps/Platform engineering in public, NDA-proof code.
+1. Demonstrate GCP DevOps/Platform engineering in public code.
 2. Close the skill gaps for a GCP DevOps / Platform Engineer role:
    Compute Engine, Cloud Run, BigQuery, GKE/Helm, Terraform, Cloud Build.
-3. Stay under a **hard $20/month** always-on budget with full FinOps labelling.
+3. Keep the always-on stack within a **$20/month** budget, with alerts at 80% and 100%, under full FinOps labelling.
 
 ## Design decision: what fits $20/month
 

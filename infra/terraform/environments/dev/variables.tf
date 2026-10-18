@@ -125,7 +125,7 @@ variable "billing_account_id" {
 }
 
 variable "budget_limit_gbp" {
-  description = "Hard monthly budget cap in GBP (billing account is GBP-denominated; ~15 GBP is approx $20)"
+  description = "Monthly budget alert threshold in GBP (billing account is GBP-denominated; ~15 GBP is approx $20; alerts at 80% and 100%, does not cap spend)"
   type        = number
   default     = 15
 }
