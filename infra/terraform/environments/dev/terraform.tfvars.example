@@ -21,6 +21,6 @@ workload             = "gcp-proof-platform"
 cost_category        = "engineering-rnd"
 data_classification  = "public-reference"
 
-# Budget guardrail (hard $20/month)
+# Budget alert threshold ($20/month); alerts at 80% and 100%, does not cap spend
 budget_limit_gbp = 15
 budget_alerts_email = "koatekpai@outlook.com"
