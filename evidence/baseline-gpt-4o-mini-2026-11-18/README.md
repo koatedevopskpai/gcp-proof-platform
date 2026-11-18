@@ -5,7 +5,8 @@ Final reference run on the model OpenAI is retiring (snapshot `gpt-4o-mini-2024-
 planned re-baseline on the replacement model.
 
 - Command: `python scripts/repeat_runs.py --arm provider --runs 5 --model gpt-4o-mini`
-- Code: branch `phase-2/fix-ai-judge-issue`, commit `c13c088` plus `scripts/repeat_runs.py`
+- Code: branch `phase-2/fix-ai-judge-issue`, commit `3a35a7a` plus `scripts/repeat_runs.py`
+  (history was rewritten on 18 Nov 2026 to remove a non-code file; commit ids here are post-rewrite)
 - Temperature 0. 5 runs per dataset, 80 judge calls.
 - Price basis: $0.15 input / $0.60 output per 1M tokens (checked 18 Nov 2026)
 - Measured total cost: **$0.001025**
