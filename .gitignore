@@ -45,3 +45,8 @@ Thumbs.db
 
 # Local dev docs
 *CODE-ALONG*.txt
+# Personal / office documents - never publish a CV or application paperwork
+*.docx
+*.dotx
+*CV*.pdf
+*CV*.doc
