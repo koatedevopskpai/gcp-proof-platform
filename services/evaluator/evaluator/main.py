@@ -90,12 +90,14 @@ def main() -> int:
         return 2
 
     provenance = build_provenance(args.dataset)
+    judge.reset_usage()
     try:
         per_record = [evaluate_record(r) for r in records]
     except JudgeError as exc:
         # Fail closed: a broken judge is an error, never a score.
         error_report = {
             "provenance": provenance,
+            "usage": judge.usage(),
             "records": len(records),
             "passed": False,
             "error": str(exc),
@@ -108,7 +110,7 @@ def main() -> int:
     scored = [r for r in per_record if all(v is not None for v in r.values())]
     if not scored:
         msg = "no scorable records (every record is missing a ground_truth or a metric)"
-        error_report = {"provenance": provenance, "records": len(records), "passed": False, "error": msg}
+        error_report = {"provenance": provenance, "usage": judge.usage(), "records": len(records), "passed": False, "error": msg}
         if args.report:
             args.report.write_text(json.dumps(error_report, indent=2))
         print(json.dumps(error_report, indent=2))
@@ -118,6 +120,7 @@ def main() -> int:
 
     report = {
         "provenance": provenance,
+        "usage": judge.usage(),
         "records": len(records),
         "aggregate_score": round(aggregate, 4),
         "threshold": args.threshold,

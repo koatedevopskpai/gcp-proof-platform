@@ -22,6 +22,28 @@ class JudgeClient:
         self.api_key = os.getenv("OPENAI_API_KEY", "")
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         self.model = os.getenv("JUDGE_MODEL", "gpt-4o-mini")
+        # USD per million tokens for gpt-4o-mini: $0.15 input, $0.60 output (standard tier).
+        # Checked against OpenAI's model docs on 2026-11-18. Override via env when the model
+        # or price changes.
+        self.price_in = float(os.getenv("JUDGE_PRICE_IN_PER_M", "0.15"))
+        self.price_out = float(os.getenv("JUDGE_PRICE_OUT_PER_M", "0.60"))
+        self.reset_usage()
+
+    def reset_usage(self) -> None:
+        self.calls = 0
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+
+    def usage(self) -> dict:
+        """Tokens used and estimated cost since the last reset. Zero for the lexical arm."""
+        cost = (self.prompt_tokens * self.price_in + self.completion_tokens * self.price_out) / 1e6
+        return {
+            "calls": self.calls,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "estimated_cost_usd": round(cost, 6),
+            "price_basis_usd_per_m_tokens": {"input": self.price_in, "output": self.price_out},
+        }
 
     @property
     def arm(self) -> str:
@@ -61,9 +83,15 @@ class JudgeClient:
                 timeout=30.0,
             )
             resp.raise_for_status()
-            text = resp.json()["choices"][0]["message"]["content"]
+            body = resp.json()
+            text = body["choices"][0]["message"]["content"]
         except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
             raise JudgeError(f"judge call failed: {type(exc).__name__}: {exc}") from exc
+        # Count spend as soon as the provider has answered, even if the reply is unusable.
+        self.calls += 1
+        used = body.get("usage") or {}
+        self.prompt_tokens += int(used.get("prompt_tokens", 0))
+        self.completion_tokens += int(used.get("completion_tokens", 0))
         match = re.search(r"\b(?:0(?:\.\d+)?|1(?:\.0+)?)\b", text)
         if not match:
             raise JudgeError(f"judge returned no parseable score: {text[:80]!r}")
