@@ -35,6 +35,11 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
     template {
       timeout = "600s"
 
+      # A quality gate fails deterministically: retrying a failed evaluation only
+      # repeats the judge spend and rewrites the same BigQuery rows. Cloud Run
+      # defaults to 3 retries, so this must be explicit.
+      max_retries = 0
+
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/ai-platform/eval-to-bq:latest"
 
