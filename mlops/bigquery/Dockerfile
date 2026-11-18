@@ -6,6 +6,10 @@ RUN apt-get update && apt-get -y upgrade && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# The image has no git, so stamp the commit at build time; reports record it in provenance.
+ARG GIT_COMMIT=""
+ENV GIT_COMMIT=$GIT_COMMIT
+
 COPY services/evaluator/requirements.txt ./eval-requirements.txt
 COPY mlops/bigquery/requirements.txt ./bq-requirements.txt
 RUN pip install --no-cache-dir -r eval-requirements.txt -r bq-requirements.txt

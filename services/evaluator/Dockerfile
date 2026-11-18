@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+# The image has no git, so stamp the commit at build time; reports record it in provenance.
+ARG GIT_COMMIT=""
+ENV GIT_COMMIT=$GIT_COMMIT
+
 WORKDIR /app
 
 COPY requirements.txt .
