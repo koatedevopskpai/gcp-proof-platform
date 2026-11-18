@@ -8,8 +8,13 @@ Emits a JSON report. Exit codes: 0 passed, 1 below threshold, 2 error (empty dat
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import subprocess
 import sys
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 from evaluator.llm import JudgeError, judge
@@ -24,6 +29,34 @@ def load_dataset(path: Path) -> list[dict]:
             if line:
                 records.append(json.loads(line))
     return records
+
+
+def _git_commit() -> str | None:
+    """Commit the code was built from: GIT_COMMIT env var first, then git, else None."""
+    env = os.getenv("GIT_COMMIT")
+    if env:
+        return env
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5,
+            cwd=Path(__file__).resolve().parent,
+        )
+        return out.stdout.strip() or None if out.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def build_provenance(dataset: Path) -> dict:
+    """Where this report came from, so a number can be traced to a run."""
+    return {
+        "run_id": str(uuid.uuid4()),
+        "evaluated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "arm": judge.arm,
+        "judge_model": judge.model if judge.arm == "provider" else None,
+        "dataset": dataset.name,
+        "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+        "git_commit": _git_commit(),
+    }
 
 
 def evaluate_record(record: dict) -> dict:
@@ -56,20 +89,35 @@ def main() -> int:
         print("ERROR: empty evaluation dataset", file=sys.stderr)
         return 2
 
+    provenance = build_provenance(args.dataset)
     try:
         per_record = [evaluate_record(r) for r in records]
     except JudgeError as exc:
         # Fail closed: a broken judge is an error, never a score.
-        error_report = {"records": len(records), "passed": False, "error": str(exc)}
+        error_report = {
+            "provenance": provenance,
+            "records": len(records),
+            "passed": False,
+            "error": str(exc),
+        }
         if args.report:
             args.report.write_text(json.dumps(error_report, indent=2))
         print(json.dumps(error_report, indent=2))
         print(f"EVAL ERROR (judge unavailable): {exc}", file=sys.stderr)
         return 2
     scored = [r for r in per_record if all(v is not None for v in r.values())]
+    if not scored:
+        msg = "no scorable records (every record is missing a ground_truth or a metric)"
+        error_report = {"provenance": provenance, "records": len(records), "passed": False, "error": msg}
+        if args.report:
+            args.report.write_text(json.dumps(error_report, indent=2))
+        print(json.dumps(error_report, indent=2))
+        print(f"EVAL ERROR: {msg}", file=sys.stderr)
+        return 2
     aggregate = sum(r["faithfulness"] + r["answer_relevancy"] for r in scored) / (2 * len(scored))
 
     report = {
+        "provenance": provenance,
         "records": len(records),
         "aggregate_score": round(aggregate, 4),
         "threshold": args.threshold,
