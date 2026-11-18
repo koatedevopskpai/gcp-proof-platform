@@ -60,3 +60,9 @@ if errors:
     raise RuntimeError(f"BigQuery insert failed: {errors}")
 
 print(f"Loaded {len(rows)} eval rows into {table_ref} (aggregate {report.get('aggregate_score')}, passed={report.get('passed')})")
+
+# Record first, then fail: a regression must fail the job so the existing
+# job-failure alert fires, instead of being logged and ignored.
+if rc == 1:
+    print("EVAL GATE FAILED: failing the job after recording the report.", file=sys.stderr)
+    raise SystemExit(1)

@@ -3,7 +3,7 @@
 Usage:
     python -m evaluator --dataset datasets/eval_set.jsonl --threshold 0.80
 
-Emits a JSON report and exits non-zero if the aggregate score is below the threshold.
+Emits a JSON report. Exit codes: 0 passed, 1 below threshold, 2 error (empty dataset or judge failure).
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from evaluator.llm import judge
+from evaluator.llm import JudgeError, judge
 from evaluator import metrics
 
 
@@ -56,7 +56,16 @@ def main() -> int:
         print("ERROR: empty evaluation dataset", file=sys.stderr)
         return 2
 
-    per_record = [evaluate_record(r) for r in records]
+    try:
+        per_record = [evaluate_record(r) for r in records]
+    except JudgeError as exc:
+        # Fail closed: a broken judge is an error, never a score.
+        error_report = {"records": len(records), "passed": False, "error": str(exc)}
+        if args.report:
+            args.report.write_text(json.dumps(error_report, indent=2))
+        print(json.dumps(error_report, indent=2))
+        print(f"EVAL ERROR (judge unavailable): {exc}", file=sys.stderr)
+        return 2
     scored = [r for r in per_record if all(v is not None for v in r.values())]
     aggregate = sum(r["faithfulness"] + r["answer_relevancy"] for r in scored) / (2 * len(scored))
 

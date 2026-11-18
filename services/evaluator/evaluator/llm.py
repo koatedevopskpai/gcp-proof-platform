@@ -13,6 +13,10 @@ from collections import Counter
 import httpx
 
 
+class JudgeError(RuntimeError):
+    """The judge could not produce a score. Never converted into a number."""
+
+
 class JudgeClient:
     def __init__(self) -> None:
         self.api_key = os.getenv("OPENAI_API_KEY", "")
@@ -40,6 +44,7 @@ class JudgeClient:
         return self._lexical_relevancy(question, answer)
 
     def _llm_score(self, prompt: str) -> float:
+        """Return a score in [0, 1], or raise JudgeError. Fails closed: no fallback value."""
         try:
             resp = httpx.post(
                 f"{self.base_url}/chat/completions",
@@ -53,12 +58,12 @@ class JudgeClient:
             )
             resp.raise_for_status()
             text = resp.json()["choices"][0]["message"]["content"]
-            match = re.search(r"\b(?:0(?:\.\d+)?|1(?:\.0+)?)\b", text)
-            if match:
-                return min(max(float(match.group()), 0.0), 1.0)
-        except (httpx.HTTPError, KeyError, ValueError):
-            pass
-        return 0.5
+        except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+            raise JudgeError(f"judge call failed: {type(exc).__name__}: {exc}") from exc
+        match = re.search(r"\b(?:0(?:\.\d+)?|1(?:\.0+)?)\b", text)
+        if not match:
+            raise JudgeError(f"judge returned no parseable score: {text[:80]!r}")
+        return min(max(float(match.group()), 0.0), 1.0)
 
     @staticmethod
     def _tokens(text: str) -> Counter:
