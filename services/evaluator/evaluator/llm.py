@@ -23,6 +23,10 @@ class JudgeClient:
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         self.model = os.getenv("JUDGE_MODEL", "gpt-4o-mini")
 
+    @property
+    def arm(self) -> str:
+        return "provider" if self.api_key else "lexical"
+
     def faithfulness(self, answer: str, contexts: list[str]) -> float:
         """Proportion of answer claims supported by the context."""
         if self.api_key:
