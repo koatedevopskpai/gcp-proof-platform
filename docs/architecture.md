@@ -38,6 +38,11 @@ startup script (`startup.sh.tftpl`).
   `run_id`, arm, model, dataset hash and commit into the JSON report; the BigQuery row
   carries the judge mean and the gate verdict, not yet the run id (a later migration).
 
+  Scoring runs in one of two arms, selected by `SCORING_ARM`: `openai` (`gpt-4o-mini`, key from
+  Secret Manager) or `vertex` (`gemini-3-flash-preview` on the global endpoint, embeddings
+  `text-embedding-005` in `us-central1`, authenticated as the eval service account). The Vertex
+  arm needs no API key at all, which removes the credential from the deployment entirely.
+
 - Cloud Scheduler can fire it daily (`0 6 * * *`) via an OIDC-authenticated HTTP call, but is
   **off by default** (`enable_scheduler = false`): the job runs on demand or from Cloud Build, so a
   probabilistic report does not become a recurring bill.

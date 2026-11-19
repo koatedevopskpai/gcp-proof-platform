@@ -38,8 +38,12 @@ def score_with_ragas() -> str | None:
     """Score the RAGAS dataset and return the trace URI, or None when disabled."""
     if os.getenv("RAGAS_ENABLED") != "1":
         return None
-    if not os.getenv("OPENAI_API_KEY"):
-        raise SystemExit("RAGAS_ENABLED=1 but no provider credential is mounted")
+
+    arm = os.getenv("SCORING_ARM", "openai")
+    if arm == "openai" and not os.getenv("OPENAI_API_KEY"):
+        raise SystemExit("SCORING_ARM=openai but no provider credential is mounted")
+    if arm == "vertex" and not (os.getenv("VERTEX_PROJECT") or os.getenv("PROJECT_ID")):
+        raise SystemExit("SCORING_ARM=vertex but no project is configured")
 
     from evaluator import ragas_runner
 
@@ -47,10 +51,15 @@ def score_with_ragas() -> str | None:
         ragas_runner.load_rows(RAGAS_DATASET),
         dataset_path=RAGAS_DATASET,
         label=os.getenv("RUN_LABEL", "cloud-run"),
-        judge_model=os.getenv("JUDGE_MODEL", "gpt-4o-mini"),
-        embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
+        judge_model=os.getenv("JUDGE_MODEL", "gpt-4o-mini" if arm == "openai" else "gemini-3-flash-preview"),
+        embedding_model=os.getenv("EMBEDDING_MODEL",
+                                  "text-embedding-3-small" if arm == "openai" else "text-embedding-005"),
         base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
         api_key=os.getenv("OPENAI_API_KEY", ""),
+        arm=arm,
+        project=os.getenv("VERTEX_PROJECT") or os.getenv("PROJECT_ID"),
+        location=os.getenv("VERTEX_LOCATION", "global"),
+        embedding_location=os.getenv("VERTEX_EMBEDDING_LOCATION", "us-central1"),
         trace_bucket=os.getenv("TRACE_BUCKET") or None,
         local_trace_dir=Path(os.getenv("TRACE_LOCAL_DIR", "/tmp/traces")),
     )

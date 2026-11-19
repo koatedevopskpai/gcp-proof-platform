@@ -94,6 +94,30 @@ variable "judge_model" {
   default     = "gpt-4o-mini"
 }
 
+variable "scoring_arm" {
+  description = "RAGAS scoring arm: openai (needs the mounted key) or vertex (runtime identity, no key)"
+  type        = string
+  default     = "openai"
+}
+
+variable "vertex_model" {
+  description = "Vertex AI judge model"
+  type        = string
+  default     = "gemini-3-flash-preview"
+}
+
+variable "vertex_location" {
+  description = "Vertex AI location for the judge (gemini-3-flash-preview is global-only)"
+  type        = string
+  default     = "global"
+}
+
+variable "vertex_embedding_location" {
+  description = "Vertex AI location for embeddings"
+  type        = string
+  default     = "us-central1"
+}
+
 variable "enable_ragas" {
   description = "Score with RAGAS and write a trace per run. Needs enable_judge and the heavier image (2 GiB)"
   type        = bool

@@ -22,14 +22,35 @@ from typing import Sequence
 from evaluator.contract import METRIC_NAMES
 
 
-def build_adapters(judge_model: str, base_url: str, api_key: str, embedding_model: str):
-    """Judge and embedding adapters for the legacy metric path."""
-    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+def build_adapters(judge_model: str, base_url: str, api_key: str, embedding_model: str,
+                   arm: str = "openai", project: str | None = None,
+                   location: str | None = None,
+                   embedding_location: str | None = None):
+    """Judge and embedding adapters for the legacy metric path.
+
+    Two arms, same metrics and the same pinned ragas version:
+      * ``openai`` - ChatOpenAI/OpenAIEmbeddings against any OpenAI-compatible endpoint.
+      * ``vertex`` - ChatVertexAI/VertexAIEmbeddings, authenticated by the runtime identity, so no
+        API key is involved.
+    """
+    if arm not in ("openai", "vertex"):
+        raise ValueError(f"unknown scoring arm: {arm!r} (expected 'openai' or 'vertex')")
+
     from ragas.embeddings import LangchainEmbeddingsWrapper
     from ragas.llms import LangchainLLMWrapper
 
-    chat = ChatOpenAI(model=judge_model, api_key=api_key, base_url=base_url, temperature=0)
-    embeddings = OpenAIEmbeddings(model=embedding_model, api_key=api_key, base_url=base_url)
+    if arm == "vertex":
+        from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
+
+        chat = ChatVertexAI(model=judge_model, project=project, location=location, temperature=0)
+        embeddings = VertexAIEmbeddings(model=embedding_model, project=project,
+                                        location=embedding_location or location)
+    else:
+        from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+        chat = ChatOpenAI(model=judge_model, api_key=api_key, base_url=base_url, temperature=0)
+        embeddings = OpenAIEmbeddings(model=embedding_model, api_key=api_key, base_url=base_url)
+
     return LangchainLLMWrapper(chat), LangchainEmbeddingsWrapper(embeddings)
 
 
@@ -57,6 +78,10 @@ def score(
     judge_base_url: str,
     judge_api_key: str,
     embedding_model: str,
+    arm: str = "openai",
+    project: str | None = None,
+    location: str | None = None,
+    embedding_location: str | None = None,
 ) -> dict:
     """Score rows of {case_id, question, contexts, answer, reference}.
 
@@ -77,7 +102,11 @@ def score(
     ]
     dataset = EvaluationDataset(samples=samples)
 
-    llm, embeddings = build_adapters(judge_model, judge_base_url, judge_api_key, embedding_model)
+    llm, embeddings = build_adapters(
+        judge_model, judge_base_url, judge_api_key, embedding_model,
+        arm=arm, project=project, location=location,
+        embedding_location=embedding_location,
+    )
     metrics = build_metrics()
 
     # evaluate() does not return judge usage; the callback is the only place it is visible.

@@ -33,9 +33,9 @@ _VERIFY_PROMPT = (
 )
 
 
-def split_statements(answer: str) -> list[str]:
+def split_statements(answer: str, client=None) -> list[str]:
     """Atomic statements, in the answer's own words."""
-    text = judge.complete(_SPLIT_PROMPT.format(answer=answer))
+    text = (client or judge).complete(_SPLIT_PROMPT.format(answer=answer))
     statements = []
     for line in text.splitlines():
         line = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", line).strip()
@@ -63,17 +63,17 @@ def _parse_verdict(text: str) -> tuple[str, str]:
     return "unsupported", f"unparseable verdict: {text.strip()[:120]}"
 
 
-def verify_statement(statement: str, contexts: list[str]) -> tuple[str, str]:
+def verify_statement(statement: str, contexts: list[str], client=None) -> tuple[str, str]:
     context = "\n".join(f"- {c}" for c in contexts)
-    return _parse_verdict(judge.complete(_VERIFY_PROMPT.format(context=context, statement=statement)))
+    return _parse_verdict((client or judge).complete(_VERIFY_PROMPT.format(context=context, statement=statement)))
 
 
-def trace(answer: str, contexts: list[str]) -> dict:
+def trace(answer: str, contexts: list[str], client=None) -> dict:
     """Statements, per-statement verdicts and reasons, plus the ratio they imply."""
-    statements = split_statements(answer)
+    statements = split_statements(answer, client)
     verdicts, reasons = [], []
     for statement in statements:
-        verdict, reason = verify_statement(statement, contexts)
+        verdict, reason = verify_statement(statement, contexts, client)
         verdicts.append(verdict)
         reasons.append(reason)
     supported = sum(1 for verdict in verdicts if verdict == "supported")

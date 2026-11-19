@@ -51,3 +51,10 @@ resource "google_secret_manager_secret_iam_member" "eval_sa_accessor" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.eval_sa.email}"
 }
+
+# The vertex scoring arm calls Vertex AI as the job's service account; no API key is involved.
+resource "google_project_iam_member" "eval_vertex_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${google_service_account.eval_sa.email}"
+}

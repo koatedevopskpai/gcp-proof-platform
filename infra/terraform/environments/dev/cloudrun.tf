@@ -68,6 +68,26 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
           value = var.judge_model
         }
         env {
+          name  = "SCORING_ARM"
+          value = var.scoring_arm
+        }
+        env {
+          name  = "VERTEX_PROJECT"
+          value = var.project_id
+        }
+        env {
+          name  = "VERTEX_MODEL"
+          value = var.vertex_model
+        }
+        env {
+          name  = "VERTEX_LOCATION"
+          value = var.vertex_location
+        }
+        env {
+          name  = "VERTEX_EMBEDDING_LOCATION"
+          value = var.vertex_embedding_location
+        }
+        env {
           name  = "RAGAS_ENABLED"
           value = var.enable_ragas ? "1" : "0"
         }

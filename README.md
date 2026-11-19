@@ -120,6 +120,11 @@ Each report also carries provenance (`run_id`, `arm`, `judge_model`, `dataset_sh
 `git_commit`) and judge spend. Exit codes: `0` gate passed, `1` gate failed, `2` judge
 unavailable — a failure is an error, never a score.
 
+**Two scoring arms, one contract.** `SCORING_ARM=openai` uses `gpt-4o-mini` with a mounted key;
+`SCORING_ARM=vertex` uses `gemini-3-flash-preview` and `text-embedding-005` through Vertex AI,
+authenticated by the job's service account — no key, nothing to leak. Both arms write the same
+score keys and trace fields, checked against a pinned snapshot of the AWS run.
+
 Known limit, kept as a test: an unsupported sentence **without a number** passes the
 deterministic gate (the judge reports it). See `services/evaluator/tests/test_gate_split.py`.
 

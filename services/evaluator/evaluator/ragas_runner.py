@@ -36,6 +36,10 @@ def run(
     embedding_model: str,
     base_url: str,
     api_key: str,
+    arm: str = "openai",
+    project: str | None = None,
+    location: str | None = None,
+    embedding_location: str | None = None,
     trace_bucket: str | None = None,
     local_trace_dir: Path | None = None,
     skip_trace: bool = False,
@@ -45,20 +49,29 @@ def run(
     started = time.time()
     run_id = "ragas-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
 
-    log(f"scoring {len(rows)} cases with {judge_model} / {embedding_model}")
+    log(f"scoring {len(rows)} cases with {arm}:{judge_model} / {embedding_model}")
     scored = ragas_metrics.score(
         rows, judge_model=judge_model, judge_base_url=base_url,
         judge_api_key=api_key, embedding_model=embedding_model,
+        arm=arm, project=project, location=location,
+        embedding_location=embedding_location,
     )
     by_case = {entry["case_id"]: entry for entry in scored["per_sample"]}
 
+    if arm == "vertex":
+        from evaluator.vertex_llm import VertexJudge
+
+        client = VertexJudge(model=judge_model, project=project, location=location)
+    else:
+        client = judge
+
     samples = []
-    judge.reset_usage()
+    client.reset_usage()
     for position, row in enumerate(rows):
         scores = {name: by_case.get(row["case_id"], {}).get(name) for name in contract.METRIC_NAMES}
         trace = ({"statements": [], "verdicts": [], "reasons": [], "supported": 0, "total": 0,
                   "faithfulness": None}
-                 if skip_trace else faithfulness_trace.trace(row["answer"], row["contexts"]))
+                 if skip_trace else faithfulness_trace.trace(row["answer"], row["contexts"], client))
         samples.append({
             "case_id": row["case_id"],
             "split": row.get("split", "unknown"),
@@ -86,7 +99,10 @@ def run(
             "run_id": run_id,
             "label": label,
             "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "judge": {"model": judge_model, "base_url": base_url},
+            "judge": {"arm": arm, "model": judge_model,
+                      "base_url": base_url if arm == "openai" else None,
+                      "project": project if arm == "vertex" else None,
+                      "location": location if arm == "vertex" else None},
             "embedding_model": embedding_model,
             "dataset": {
                 "path": str(dataset_path),
@@ -95,7 +111,7 @@ def run(
                 "splits": sorted({row.get("split", "unknown") for row in rows}),
             },
             "aggregate": scored["aggregate"],
-            "judge_usage": {"ragas": scored["usage"], "trace": judge.usage()},
+            "judge_usage": {"ragas": scored["usage"], "trace": client.usage()},
             "metric_names_returned": scored["metric_names_returned"],
             "duration_seconds": round(time.time() - started, 1),
             "limits": [
