@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+# Pull patched base packages so the Trivy HIGH/CRITICAL gate passes (zlib1g
+# CVE-2026-85091 is fixed in a Debian point release).
+RUN apt-get update && apt-get -y upgrade && rm -rf /var/lib/apt/lists/*
+
 # The image has no git, so stamp the commit at build time; reports record it in provenance.
 ARG GIT_COMMIT=""
 ENV GIT_COMMIT=$GIT_COMMIT
