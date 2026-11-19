@@ -55,3 +55,8 @@ Thumbs.db
 # Terraform plan artefacts (binary, never commit)
 tfplan*
 *.tfplan
+
+# The plain-English project overview is kept outside this repository (DOCX/PDF), never published
+docs/overview.md
+docs/overview*.md
+overview/
