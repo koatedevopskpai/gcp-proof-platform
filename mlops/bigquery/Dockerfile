@@ -11,8 +11,10 @@ ARG GIT_COMMIT=""
 ENV GIT_COMMIT=$GIT_COMMIT
 
 COPY services/evaluator/requirements.txt ./eval-requirements.txt
+COPY services/evaluator/requirements-ragas.txt ./eval-ragas-requirements.txt
 COPY mlops/bigquery/requirements.txt ./bq-requirements.txt
-RUN pip install --no-cache-dir -r eval-requirements.txt -r bq-requirements.txt
+# RAGAS pulls langchain and pandas; this is why the job runs with 2 GiB and 1800s.
+RUN pip install --no-cache-dir -r eval-requirements.txt -r eval-ragas-requirements.txt -r bq-requirements.txt
 
 COPY services/evaluator/evaluator /app/evaluator
 COPY services/evaluator/datasets /app/datasets

@@ -1,7 +1,12 @@
-"""eval-to-bq: run the MLOps evaluation gate and load the report into BigQuery.
+"""eval-to-bq: run the deterministic evaluation gate, optionally score with RAGAS, load BigQuery.
 
-Runs as a Cloud Run job (scheduled by Cloud Scheduler). Reuses the evaluator
-package from services/evaluator - the same gate that runs in CI.
+Runs as a Cloud Run job. Reuses the evaluator package from services/evaluator, so the gate that
+fails a build is the same gate that writes the row.
+
+Order matters: record first, then fail. A regression is written to BigQuery and then exits 1 so
+the job-failure alert fires — the row is the evidence, the exit code is the signal.
+
+RAGAS scoring is off unless RAGAS_ENABLED=1, because it needs a provider credential and ~2 GiB.
 """
 from __future__ import annotations
 
@@ -9,60 +14,85 @@ import json
 import os
 import sys
 from datetime import date
+from pathlib import Path
 
-# Reuse the evaluator's gate logic; point it at the bundled dataset.
-sys.argv = [
-    "eval",
-    "--dataset", "/app/datasets/eval_set.jsonl",
-    "--threshold", "0.8",
-    "--report", "/tmp/report.json",
-]
+DATASET = Path("/app/datasets/eval_set.jsonl")
+RAGAS_DATASET = Path("/app/datasets/ragas_set.jsonl")
+REPORT = Path("/tmp/report.json")
 
-from evaluator.main import main as run_eval  # noqa: E402
 
-rc = run_eval()
-if rc not in (0, 1):
-    raise SystemExit(rc)
+def run_gate() -> int:
+    """Invoke the evaluator CLI with the job's fixed arguments."""
+    sys.argv = [
+        "eval",
+        "--dataset", str(DATASET),
+        "--threshold", "0.8",
+        "--report", str(REPORT),
+    ]
+    from evaluator.main import main as run_eval
 
-with open("/tmp/report.json", encoding="utf-8") as fh:
-    report = json.load(fh)
+    return run_eval()
 
-rows = []
-for r in report.get("per_record", []):
-    rows.append(
-        {
-            "report_date": date.today().isoformat(),
-            "question": r.get("question"),
-            "map_4": r.get("map@4"),
-            "ndcg_4": r.get("ndcg@4"),
-            "rouge_l": r.get("rouge_l"),
-            "faithfulness": r.get("faithfulness"),
-            "answer_relevancy": r.get("answer_relevancy"),
-            "aggregate_score": report.get("aggregate_score"),
-            "passed": report.get("passed"),
-        }
+
+def score_with_ragas() -> str | None:
+    """Score the RAGAS dataset and return the trace URI, or None when disabled."""
+    if os.getenv("RAGAS_ENABLED") != "1":
+        return None
+    if not os.getenv("OPENAI_API_KEY"):
+        raise SystemExit("RAGAS_ENABLED=1 but no provider credential is mounted")
+
+    from evaluator import ragas_runner
+
+    payload = ragas_runner.run(
+        ragas_runner.load_rows(RAGAS_DATASET),
+        dataset_path=RAGAS_DATASET,
+        label=os.getenv("RUN_LABEL", "cloud-run"),
+        judge_model=os.getenv("JUDGE_MODEL", "gpt-4o-mini"),
+        embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
+        base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+        api_key=os.getenv("OPENAI_API_KEY", ""),
+        trace_bucket=os.getenv("TRACE_BUCKET") or None,
+        local_trace_dir=Path(os.getenv("TRACE_LOCAL_DIR", "/tmp/traces")),
     )
+    return payload["trace_uri"]
 
-if not rows:
-    print("No rows to load.")
-    raise SystemExit(0)
 
-from google.cloud import bigquery  # noqa: E402
+def main() -> int:
+    rc = run_gate()
+    if rc not in (0, 1):
+        # Exit 2 is an operational error; there is no trustworthy report to load.
+        raise SystemExit(rc)
 
-project = os.environ["PROJECT_ID"]
-dataset = os.environ["BQ_DATASET"]
-table = os.environ["BQ_TABLE"]
+    report = json.loads(REPORT.read_text(encoding="utf-8"))
+    trace_uri = score_with_ragas()
 
-client = bigquery.Client(project=project)
-table_ref = f"{project}.{dataset}.{table}"
-errors = client.insert_rows_json(table_ref, rows)
-if errors:
-    raise RuntimeError(f"BigQuery insert failed: {errors}")
+    from evaluator.bq_rows import build_rows
 
-print(f"Loaded {len(rows)} eval rows into {table_ref} (aggregate {report.get('aggregate_score')}, passed={report.get('passed')})")
+    rows = build_rows(report, trace_uri=trace_uri, report_date=date.today().isoformat())
+    if not rows:
+        print("No rows to load.")
+        raise SystemExit(0)
 
-# Record first, then fail: a regression must fail the job so the existing
-# job-failure alert fires, instead of being logged and ignored.
-if rc == 1:
-    print("EVAL GATE FAILED: failing the job after recording the report.", file=sys.stderr)
-    raise SystemExit(1)
+    from google.cloud import bigquery
+
+    project = os.environ["PROJECT_ID"]
+    dataset = os.environ["BQ_DATASET"]
+    table = os.environ["BQ_TABLE"]
+    table_ref = f"{project}.{dataset}.{table}"
+
+    errors = bigquery.Client(project=project).insert_rows_json(table_ref, rows)
+    if errors:
+        raise RuntimeError(f"BigQuery insert failed: {errors}")
+
+    print(f"Loaded {len(rows)} eval rows into {table_ref} "
+          f"(gate passed={report.get('passed')}, aggregate {report.get('aggregate_score')}, "
+          f"trace {trace_uri or 'none'})")
+
+    if rc == 1:
+        print("EVAL GATE FAILED: failing the job after recording the report.", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
