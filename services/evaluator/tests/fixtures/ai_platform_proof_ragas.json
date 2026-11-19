@@ -1,0 +1,53 @@
+{
+  "source": "ai-platform-proof",
+  "pinned_commit": "6c14665",
+  "artefact": "artifacts/experiments/ragas-judge-gpt4o-mini.json",
+  "run_fields": [
+    "aggregate",
+    "dataset",
+    "duration_seconds",
+    "embedding_model",
+    "grade",
+    "judge",
+    "judge_usage",
+    "label",
+    "limits",
+    "metric_names_returned",
+    "run_id",
+    "samples"
+  ],
+  "sample_fields": [
+    "answer",
+    "case_id",
+    "contexts",
+    "generation_mode",
+    "model",
+    "question",
+    "reference",
+    "retrieved_ids",
+    "scores",
+    "sources",
+    "split"
+  ],
+  "score_keys": [
+    "answer_correctness",
+    "answer_relevancy",
+    "context_precision",
+    "context_recall",
+    "faithfulness"
+  ],
+  "aggregate_keys": [
+    "answer_correctness",
+    "answer_relevancy",
+    "context_precision",
+    "context_recall",
+    "faithfulness"
+  ],
+  "judge_usage_keys": [
+    "completion_tokens",
+    "prompt_tokens",
+    "successful_requests",
+    "total_cost_usd",
+    "total_tokens"
+  ]
+}

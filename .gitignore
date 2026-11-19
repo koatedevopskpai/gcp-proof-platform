@@ -50,3 +50,4 @@ Thumbs.db
 *.dotx
 *CV*.pdf
 *CV*.doc
+!services/evaluator/tests/fixtures/*.json
