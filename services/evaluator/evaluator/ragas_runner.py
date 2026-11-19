@@ -67,11 +67,20 @@ def run(
 
     samples = []
     client.reset_usage()
+    trace_errors = 0
     for position, row in enumerate(rows):
         scores = {name: by_case.get(row["case_id"], {}).get(name) for name in contract.METRIC_NAMES}
-        trace = ({"statements": [], "verdicts": [], "reasons": [], "supported": 0, "total": 0,
-                  "faithfulness": None}
-                 if skip_trace else faithfulness_trace.trace(row["answer"], row["contexts"], client))
+        if skip_trace:
+            trace = {"statements": [], "verdicts": [], "reasons": [], "supported": 0, "total": 0,
+                     "faithfulness": None}
+        else:
+            try:
+                trace = faithfulness_trace.trace(row["answer"], row["contexts"], client)
+            except Exception as exc:  # a failed trace is recorded, not a reason to lose the run
+                trace_errors += 1
+                trace = {"statements": [], "verdicts": [], "reasons": [], "supported": 0, "total": 0,
+                         "faithfulness": None, "error": f"{type(exc).__name__}: {exc}"}
+                log(f"  {row['case_id']}: trace failed ({type(exc).__name__})")
         samples.append({
             "case_id": row["case_id"],
             "split": row.get("split", "unknown"),
@@ -90,6 +99,7 @@ def run(
             "trace_supported": trace["supported"],
             "trace_total": trace["total"],
             "trace_faithfulness": trace["faithfulness"],
+            "trace_error": trace.get("error"),
         })
         log(f"  {position + 1}/{len(rows)} {row['case_id']}: "
             f"faithfulness={scores['faithfulness']} trace={trace['faithfulness']}")
@@ -114,6 +124,7 @@ def run(
             "judge_usage": {"ragas": scored["usage"], "trace": client.usage()},
             "metric_names_returned": scored["metric_names_returned"],
             "duration_seconds": round(time.time() - started, 1),
+            "trace_errors": trace_errors,
             "limits": [
                 "stored answers, not a live service - a scoring demonstration, not a benchmark",
                 "one judge model at one point in time; not calibrated against human labels",

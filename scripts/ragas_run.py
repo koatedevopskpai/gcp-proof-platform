@@ -51,13 +51,20 @@ def main() -> int:
         print("OPENAI_API_KEY is required for the openai arm", file=sys.stderr)
         return 2
 
+    if args.arm == "vertex":
+        judge_model = os.getenv("VERTEX_MODEL", DEFAULTS["vertex"]["model"])
+        embedding_model = os.getenv("VERTEX_EMBEDDING_MODEL", DEFAULTS["vertex"]["embedding"])
+    else:
+        judge_model = os.getenv("JUDGE_MODEL", DEFAULTS["openai"]["model"])
+        embedding_model = os.getenv("EMBEDDING_MODEL", DEFAULTS["openai"]["embedding"])
+
     rows = ragas_runner.load_rows(args.dataset)
     payload = ragas_runner.run(
         rows,
         dataset_path=args.dataset,
         label=args.label,
-        judge_model=os.getenv("JUDGE_MODEL", DEFAULTS[args.arm]["model"]),
-        embedding_model=os.getenv("EMBEDDING_MODEL", DEFAULTS[args.arm]["embedding"]),
+        judge_model=judge_model,
+        embedding_model=embedding_model,
         base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
         api_key=api_key,
         arm=args.arm,

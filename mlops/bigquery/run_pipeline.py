@@ -47,13 +47,21 @@ def score_with_ragas() -> str | None:
 
     from evaluator import ragas_runner
 
+    if arm == "openai":
+        judge_model = os.getenv("JUDGE_MODEL", "gpt-4o-mini")
+        embedding_model = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    else:
+        # JUDGE_MODEL belongs to the OpenAI judge and is always set on this job; the Vertex arm
+        # must not inherit it.
+        judge_model = os.getenv("VERTEX_MODEL", "gemini-3-flash-preview")
+        embedding_model = os.getenv("VERTEX_EMBEDDING_MODEL", "text-embedding-005")
+
     payload = ragas_runner.run(
         ragas_runner.load_rows(RAGAS_DATASET),
         dataset_path=RAGAS_DATASET,
         label=os.getenv("RUN_LABEL", "cloud-run"),
-        judge_model=os.getenv("JUDGE_MODEL", "gpt-4o-mini" if arm == "openai" else "gemini-3-flash-preview"),
-        embedding_model=os.getenv("EMBEDDING_MODEL",
-                                  "text-embedding-3-small" if arm == "openai" else "text-embedding-005"),
+        judge_model=judge_model,
+        embedding_model=embedding_model,
         base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
         api_key=os.getenv("OPENAI_API_KEY", ""),
         arm=arm,

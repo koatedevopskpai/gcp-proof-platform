@@ -40,11 +40,17 @@ def build_adapters(judge_model: str, base_url: str, api_key: str, embedding_mode
     from ragas.llms import LangchainLLMWrapper
 
     if arm == "vertex":
-        from langchain_google_vertexai import ChatVertexAI, VertexAIEmbeddings
+        # Chat goes through Vertex's OpenAI-compatible endpoint and embeddings through the REST
+        # predict endpoint (see evaluator/vertex_rest.py). No gRPC, no vendor SDK.
+        from langchain_openai import ChatOpenAI
 
-        chat = ChatVertexAI(model=judge_model, project=project, location=location, temperature=0)
-        embeddings = VertexAIEmbeddings(model=embedding_model, project=project,
-                                        location=embedding_location or location)
+        from evaluator.vertex_rest import VertexRestEmbeddings, access_token, chat_base_url
+
+        chat = ChatOpenAI(model=f"google/{judge_model}", api_key=access_token(),
+                          base_url=chat_base_url(project or "", location or "global"),
+                          temperature=0, timeout=180, max_retries=4)
+        embeddings = VertexRestEmbeddings(model=embedding_model, project=project or "",
+                                          location=embedding_location or location or "us-central1")
     else:
         from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 

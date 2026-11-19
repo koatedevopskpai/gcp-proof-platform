@@ -30,13 +30,17 @@ class VertexJudge:
 
     def _chat(self):
         if self._client is None:
-            from langchain_google_vertexai import ChatVertexAI
+            from langchain_openai import ChatOpenAI
 
-            self._client = ChatVertexAI(
-                model=self.model,
-                project=self.project,
-                location=self.location,
+            from evaluator.vertex_rest import access_token, chat_base_url
+
+            self._client = ChatOpenAI(
+                model=f"google/{self.model}",
+                api_key=access_token(),
+                base_url=chat_base_url(self.project, self.location),
                 temperature=0,
+                timeout=180,
+                max_retries=4,
             )
         return self._client
 
