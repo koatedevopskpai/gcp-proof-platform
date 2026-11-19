@@ -33,7 +33,8 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
 
   template {
     template {
-      timeout = "600s"
+      # RAGAS + pandas + langchain; traced runs of ten cases took ~140 s locally.
+      timeout = "1800s"
 
       # A quality gate fails deterministically: retrying a failed evaluation only
       # repeats the judge spend and rewrites the same BigQuery rows. Cloud Run
@@ -45,8 +46,8 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
 
         resources {
           limits = {
-            cpu    = "1"
-            memory = "512Mi"
+            cpu    = "2"
+            memory = "2Gi"
           }
         }
 
@@ -61,6 +62,37 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
         env {
           name  = "BQ_TABLE"
           value = google_bigquery_table.eval_reports.table_id
+        }
+        env {
+          name  = "JUDGE_MODEL"
+          value = var.judge_model
+        }
+        env {
+          name  = "RAGAS_ENABLED"
+          value = var.enable_ragas ? "1" : "0"
+        }
+        env {
+          name  = "TRACE_BUCKET"
+          value = google_storage_bucket.eval_traces.name
+        }
+        env {
+          name  = "TRACE_LOCAL_DIR"
+          value = "/tmp/traces"
+        }
+
+        # The credential is a secret reference, never an inline value: an env { value }
+        # would put the key in Terraform state and in the Cloud Run revision.
+        dynamic "env" {
+          for_each = var.enable_judge ? [1] : []
+          content {
+            name = "OPENAI_API_KEY"
+            value_source {
+              secret_key_ref {
+                secret  = google_secret_manager_secret.judge_api_key.secret_id
+                version = "latest"
+              }
+            }
+          }
         }
       }
 

@@ -77,9 +77,39 @@ variable "enable_gke" {
 }
 
 variable "enable_scheduler" {
-  description = "Schedule the eval-to-bq Cloud Run job daily"
+  description = "Run eval-to-bq daily. Off by default: a probabilistic report on a schedule is a recurring bill for no new signal. Invoke the job on demand or from Cloud Build instead."
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "enable_judge" {
+  description = "Mount the provider credential into the eval job. Requires a secret version; see eval_pipeline.tf"
+  type        = bool
+  default     = false
+}
+
+variable "judge_model" {
+  description = "Judge model name handed to the evaluator"
+  type        = string
+  default     = "gpt-4o-mini"
+}
+
+variable "enable_ragas" {
+  description = "Score with RAGAS and write a trace per run. Needs enable_judge and the heavier image (2 GiB)"
+  type        = bool
+  default     = false
+}
+
+variable "judge_secret_id" {
+  description = "Secret Manager secret holding the provider API key"
+  type        = string
+  default     = "eval-judge-api-key"
+}
+
+variable "trace_bucket_name" {
+  description = "GCS bucket for evaluation traces (defaults to <project>-eval-traces)"
+  type        = string
+  default     = ""
 }
 
 # --- FinOps tagging taxonomy ---
