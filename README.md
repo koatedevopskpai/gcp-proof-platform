@@ -33,7 +33,7 @@ companion to the AWS `ai-platform-proof` project.
 | Requirement | Where |
 |---|---|
 | **Compute Engine** | Always-on `e2-small` VM running the full stack (`infra/terraform/.../main.tf`) |
-| **Cloud Run** | `eval-to-bq` job that runs the MLOps eval gate and loads reports into BigQuery |
+| **Cloud Run** | `eval-to-bq` job (2 vCPU / 2 GiB, 1800 s) that runs the deterministic gate, optionally scores with RAGAS, writes a trace object, and loads the rows into BigQuery |
 | **BigQuery** | `ai_platform.eval_reports` dataset/table + loader pipeline (`mlops/bigquery`) |
 | **GKE + Helm** | Optional module (`gke.tf`, on the hardened VPC) + charts (`infra/helm`) — spin up for demos |
 | **Terraform** | Entire GCP footprint, `default_labels` FinOps taxonomy |
@@ -49,7 +49,7 @@ companion to the AWS `ai-platform-proof` project.
 | Component | ~$/mo |
 |---|---|
 | Compute Engine e2-small VM | 12 |
-| Cloud Run job (daily) + Cloud Scheduler | ~1 |
+| Cloud Run job (on demand; scheduler off by default) | ~1 |
 | BigQuery (small eval pipeline) | ~1 |
 | Artifact Registry (few GB) | ~0.50 |
 | VPC / subnets / PSC / WIF / VPC-SC / Monitoring | $0 |

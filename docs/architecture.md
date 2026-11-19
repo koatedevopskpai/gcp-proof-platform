@@ -38,7 +38,11 @@ startup script (`startup.sh.tftpl`).
   `run_id`, arm, model, dataset hash and commit into the JSON report; the BigQuery row
   carries the judge mean and the gate verdict, not yet the run id (a later migration).
 
-- Cloud Scheduler fires it daily (`0 6 * * *`) via an OIDC-authenticated HTTP call.
+- Cloud Scheduler can fire it daily (`0 6 * * *`) via an OIDC-authenticated HTTP call, but is
+  **off by default** (`enable_scheduler = false`): the job runs on demand or from Cloud Build, so a
+  probabilistic report does not become a recurring bill.
+- The job writes one trace object per run to GCS (`TRACE_BUCKET`) when `RAGAS_ENABLED=1`, and the
+  BigQuery row carries `run_id`, `case_id`, `judge_model`, `trace_uri` and `report_only`.
 - Env-injected config: `PROJECT_ID`, `BQ_DATASET`, `BQ_TABLE`.
 
 ## CI/CD (Cloud Build)
