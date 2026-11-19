@@ -22,20 +22,29 @@ class JudgeClient:
         self.api_key = os.getenv("OPENAI_API_KEY", "")
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         self.model = os.getenv("JUDGE_MODEL", "gpt-4o-mini")
+        self.vertex_model = os.getenv("VERTEX_MODEL", "gemini-3-flash-preview")
         # USD per million tokens for gpt-4o-mini: $0.15 input, $0.60 output (standard tier).
         # Checked against OpenAI's model docs on 2026-11-18. Override via env when the model
         # or price changes.
         self.price_in = float(os.getenv("JUDGE_PRICE_IN_PER_M", "0.15"))
         self.price_out = float(os.getenv("JUDGE_PRICE_OUT_PER_M", "0.60"))
+        self._vertex = None
         self.reset_usage()
 
     def reset_usage(self) -> None:
         self.calls = 0
         self.prompt_tokens = 0
         self.completion_tokens = 0
+        if self._vertex is not None:
+            self._vertex.reset_usage()
 
     def usage(self) -> dict:
-        """Tokens used and estimated cost since the last reset. Zero for the lexical arm."""
+        """Tokens used and estimated cost since the last reset. Unpriced for the Vertex arm."""
+        if self.arm == "vertex":
+            if self._vertex is None:
+                return {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0,
+                        "estimated_cost_usd": None, "pricing": "not applied: Vertex pricing"}
+            return self._vertex.usage()
         cost = (self.prompt_tokens * self.price_in + self.completion_tokens * self.price_out) / 1e6
         return {
             "calls": self.calls,
@@ -47,11 +56,43 @@ class JudgeClient:
 
     @property
     def arm(self) -> str:
+        """JUDGE_ARM selects the judge explicitly; an unset arm keeps the old key-based default.
+
+        SCORING_ARM is deliberately not consulted: it selects RAGAS and the trace, not the judge.
+        """
+        explicit = os.getenv("JUDGE_ARM", "").strip().lower()
+        if explicit in ("openai", "provider"):
+            return "provider"
+        if explicit == "vertex":
+            return "vertex"
+        if explicit == "lexical":
+            return "lexical"
         return "provider" if self.api_key else "lexical"
+
+    def _require_provider_key(self) -> None:
+        if self.arm == "provider" and not self.api_key:
+            raise JudgeError("JUDGE_ARM=openai requires OPENAI_API_KEY")
+
+    @property
+    def judge_model(self) -> str | None:
+        """Model name for provenance: None for the lexical arm, which calls no model."""
+        if self.arm == "vertex":
+            return self.vertex_model
+        if self.arm == "provider":
+            return self.model
+        return None
+
+    def _vertex_client(self):
+        if self._vertex is None:
+            from evaluator.vertex_llm import VertexJudge
+
+            self._vertex = VertexJudge()
+        return self._vertex
 
     def faithfulness(self, answer: str, contexts: list[str]) -> float:
         """Proportion of answer claims supported by the context."""
-        if self.api_key:
+        if self.arm != "lexical":
+            self._require_provider_key()
             prompt = (
                 "Rate faithfulness of the ANSWER to the CONTEXT from 0.0 to 1.0. "
                 "Return only the number.\n\n"
@@ -61,7 +102,8 @@ class JudgeClient:
         return self._lexical_faithfulness(answer, contexts)
 
     def answer_relevancy(self, question: str, answer: str) -> float:
-        if self.api_key:
+        if self.arm != "lexical":
+            self._require_provider_key()
             prompt = (
                 "Rate how well ANSWER addresses QUESTION from 0.0 to 1.0. Return only the number.\n\n"
                 f"QUESTION:\n{question}\n\nANSWER:\n{answer}"
@@ -71,6 +113,9 @@ class JudgeClient:
 
     def complete(self, prompt: str) -> str:
         """Raw judge completion. Raises JudgeError; counts spend as soon as the provider answers."""
+        if self.arm == "vertex":
+            return self._vertex_client().complete(prompt)
+        self._require_provider_key()
         try:
             resp = httpx.post(
                 f"{self.base_url}/chat/completions",

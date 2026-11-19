@@ -83,21 +83,37 @@ variable "enable_scheduler" {
 }
 
 variable "enable_judge" {
-  description = "Mount the provider credential into the eval job. Requires a secret version; see eval_pipeline.tf"
+  description = "Mount the provider credential into the eval job. Only needed when judge_arm = openai; requires a secret version"
   type        = bool
   default     = false
 }
 
+variable "judge_arm" {
+  description = "Judge used for the gate's report: lexical (no model, free), vertex (runtime identity), or openai (needs the mounted key)"
+  type        = string
+  default     = "lexical"
+
+  validation {
+    condition     = contains(["lexical", "vertex", "openai"], var.judge_arm)
+    error_message = "judge_arm must be lexical, vertex or openai."
+  }
+}
+
 variable "judge_model" {
-  description = "Judge model name handed to the evaluator"
+  description = "OpenAI judge model, used only when judge_arm = openai"
   type        = string
   default     = "gpt-4o-mini"
 }
 
 variable "scoring_arm" {
-  description = "RAGAS scoring arm: openai (needs the mounted key) or vertex (runtime identity, no key)"
+  description = "RAGAS scoring arm: vertex (runtime identity, no key) or openai (needs the mounted key)"
   type        = string
-  default     = "openai"
+  default     = "vertex"
+
+  validation {
+    condition     = contains(["vertex", "openai"], var.scoring_arm)
+    error_message = "scoring_arm must be vertex or openai."
+  }
 }
 
 variable "vertex_model" {
@@ -119,9 +135,9 @@ variable "vertex_embedding_location" {
 }
 
 variable "enable_ragas" {
-  description = "Score with RAGAS and write a trace per run. Needs enable_judge and the heavier image (2 GiB)"
+  description = "Score with RAGAS and write a trace per run. The vertex arm needs no key; the openai arm needs enable_judge"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "judge_secret_id" {
