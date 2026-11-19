@@ -59,11 +59,14 @@ def test_run_ids_differ(monkeypatch, tmp_path):
     assert a != b
 
 
-def test_unscorable_dataset_exits_2_with_error(monkeypatch, tmp_path):
+def test_dataset_without_ground_truth_still_gates_on_retrieval(monkeypatch, tmp_path):
+    """No ground truth means no ROUGE-L; the deterministic gate still runs."""
     monkeypatch.setattr(main_mod.judge, "api_key", "")
     data = tmp_path / "d.jsonl"
-    data.write_text(json.dumps({"question": "q", "contexts": ["c"], "answer": "c"}) + "\n")
+    data.write_text(json.dumps({"question": "q", "contexts": [{"id": "c", "content": "c"}],
+                                "retrieved": ["c"], "relevant_ids": ["c"], "answer": "c"}) + "\n")
     rc, out = _run(monkeypatch, tmp_path, data)
-    assert rc == 2
-    assert "error" in out and out["passed"] is False
-    assert "provenance" in out
+    assert rc == 0
+    assert out["gate"]["passed"] is True
+    assert out["per_record"][0]["rouge_l"] is None
+    assert out["report"]["rouge_l"] is None

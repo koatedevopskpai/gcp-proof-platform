@@ -31,6 +31,13 @@ startup script (`startup.sh.tftpl`).
 - `ai_platform.eval_reports` table (schema in `schemas/eval_reports.json`).
 - Cloud Run job `eval-to-bq` runs the evaluation gate (reusing `services/evaluator`)
   and loads one row per eval question into BigQuery.
+
+  The gate is deterministic — retrieval MAP@4/nDCG@4 plus structural and numeric checks —
+  and `passed` records its verdict. The judge scores (`faithfulness`, `answer_relevancy`)
+  and their mean (`aggregate_score`) are reported, never gated. Every run writes a
+  `run_id`, arm, model, dataset hash and commit into the JSON report; the BigQuery row
+  carries the judge mean and the gate verdict, not yet the run id (a later migration).
+
 - Cloud Scheduler fires it daily (`0 6 * * *`) via an OIDC-authenticated HTTP call.
 - Env-injected config: `PROJECT_ID`, `BQ_DATASET`, `BQ_TABLE`.
 

@@ -94,8 +94,34 @@ gcloud builds submit --config infra/cloudbuild/cloudbuild.yaml \
 ```
 
 Builds + pushes the 4 services and the eval pipeline to Artifact Registry, runs the
-unit tests (Python/Node/.NET), and **fails the build if the evaluation gate drops
-below 0.80** — quality enforced in CI, exactly like the AWS project.
+unit tests (Python/Node/.NET), and **fails the build if the deterministic gate fails**
+— retrieval MAP@4/nDCG@4 below 0.80, a structurally incomplete record, or a number in
+the answer that the reference does not support. Judge scores are recorded in the report
+but never fail the build.
+
+## Evaluation gate
+
+The gate is deterministic; the judge is a report.
+
+| Signal | Decides the build? |
+|---|---|
+| MAP@4, nDCG@4 (retrieval) | **yes** — both must be ≥ 0.80 |
+| Structural completeness (answer, contexts, retrieved ids present) | **yes** |
+| Numeric consistency (numbers in the answer must appear in the reference or the contexts) | **yes** |
+| Faithfulness, answer relevancy (LLM, or the lexical fallback) | no — reported only |
+| ROUGE-L | no — reported only |
+
+Why: `evidence/eval-gate-audit.md` measured the judge scoring **1.0** for the same input
+RAGAS scored **0.3333**, returning a constant **0.5** after an API failure, and moving
+**0.25** between identical runs. A number like that can be reported, not used to block
+work.
+
+Each report also carries provenance (`run_id`, `arm`, `judge_model`, `dataset_sha256`,
+`git_commit`) and judge spend. Exit codes: `0` gate passed, `1` gate failed, `2` judge
+unavailable — a failure is an error, never a score.
+
+Known limit, kept as a test: an unsupported sentence **without a number** passes the
+deterministic gate (the judge reports it). See `services/evaluator/tests/test_gate_split.py`.
 
 ## Repository map
 
