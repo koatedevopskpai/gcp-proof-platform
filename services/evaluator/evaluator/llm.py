@@ -69,8 +69,8 @@ class JudgeClient:
             return self._llm_score(prompt)
         return self._lexical_relevancy(question, answer)
 
-    def _llm_score(self, prompt: str) -> float:
-        """Return a score in [0, 1], or raise JudgeError. Fails closed: no fallback value."""
+    def complete(self, prompt: str) -> str:
+        """Raw judge completion. Raises JudgeError; counts spend as soon as the provider answers."""
         try:
             resp = httpx.post(
                 f"{self.base_url}/chat/completions",
@@ -87,11 +87,15 @@ class JudgeClient:
             text = body["choices"][0]["message"]["content"]
         except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
             raise JudgeError(f"judge call failed: {type(exc).__name__}: {exc}") from exc
-        # Count spend as soon as the provider has answered, even if the reply is unusable.
         self.calls += 1
         used = body.get("usage") or {}
         self.prompt_tokens += int(used.get("prompt_tokens", 0))
         self.completion_tokens += int(used.get("completion_tokens", 0))
+        return text
+
+    def _llm_score(self, prompt: str) -> float:
+        """Return a score in [0, 1], or raise JudgeError. Fails closed: no fallback value."""
+        text = self.complete(prompt)
         match = re.search(r"\b(?:0(?:\.\d+)?|1(?:\.0+)?)\b", text)
         if not match:
             raise JudgeError(f"judge returned no parseable score: {text[:80]!r}")
