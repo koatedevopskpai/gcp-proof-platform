@@ -75,6 +75,20 @@ Verified afterwards:
 The public IP is released. The stack existed for roughly eleven minutes and cost well under $0.01
 (`e2-small` plus 30 GB `pd-balanced` disk at that duration).
 
+### After the teardown
+
+To show the two halves are independent, the job was executed again with no VM, VPC, WIF or
+monitoring in the project:
+
+| | |
+|---|---|
+| Execution | `eval-to-bq-9ngq4`, 01:22:33Z → 01:24:48Z, succeeded |
+| BigQuery rows | 4, run id `c754857c-b324-4a08-b8b3-da77e4f47318` |
+| Trace | `gs://gcp-proof-platform-eval-traces/ragas/ragas-20261119T012340Z-0895e9.jsonl` |
+
+The evaluation path depends on Cloud Run, BigQuery, Secret Manager and GCS, not on the platform VM.
+
+
 ## Limits
 
 - The SLO and uptime check were destroyed minutes after creation, so neither produced any measured
