@@ -19,6 +19,12 @@ provider "google" {
   region  = var.region
   zone    = var.zone
 
+  # The Go API client behind the provider does not inherit the ADC quota project, and
+  # billingbudgets.googleapis.com rejects calls without one. Sending the project explicitly
+  # fixes that and makes quota attribution unambiguous for every API call.
+  user_project_override = true
+  billing_project       = var.project_id
+
   # --- FinOps tagging taxonomy (applied to every labelled resource) ---
   default_labels = {
     project             = var.project_id
