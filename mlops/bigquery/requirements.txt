@@ -1,1 +1,3 @@
 google-cloud-bigquery==3.*
+# Trace sink: trace_store writes one JSONL object per run when TRACE_BUCKET is set.
+google-cloud-storage==3.*
