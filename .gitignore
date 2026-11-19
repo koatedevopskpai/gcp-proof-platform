@@ -51,3 +51,7 @@ Thumbs.db
 *CV*.pdf
 *CV*.doc
 !services/evaluator/tests/fixtures/*.json
+
+# Terraform plan artefacts (binary, never commit)
+tfplan*
+*.tfplan
