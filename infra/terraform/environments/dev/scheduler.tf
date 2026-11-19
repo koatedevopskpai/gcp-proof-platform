@@ -10,8 +10,8 @@ resource "google_cloud_scheduler_job" "eval_daily" {
   schedule  = "0 6 * * *"
   time_zone = "UTC"
 
-  # The job can run up to 600s; give the trigger matching headroom.
-  attempt_deadline = "600s"
+  # The job can run up to 1800s; give the trigger matching headroom.
+  attempt_deadline = "1800s"
 
   http_target {
     http_method = "POST"
