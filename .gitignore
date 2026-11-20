@@ -30,9 +30,20 @@ infra/terraform/**/crash.log
 
 # GCP / gcloud
 .env
-*.json  # keep local keys/service-account files out (except tracked schema)
+# Keep local keys and service-account files out of git. (Comments must be on their own line: git has no inline
+# comments, so an earlier version of this rule matched nothing at all.)
+*.json
 !infra/terraform/**/schemas/*.json
 !mlops/model-registry/*.json
+!services/**/package.json
+!services/**/package-lock.json
+!services/**/tsconfig.json
+!services/**/appsettings*.json
+!services/evaluator/tests/fixtures/*.json
+!evidence/**/*.json
+
+# Local run outputs (reproducible; evidence worth keeping is copied under evidence/)
+artifacts/
 
 # Helm
 infra/helm/**/charts/*.tgz
@@ -50,7 +61,6 @@ Thumbs.db
 *.dotx
 *CV*.pdf
 *CV*.doc
-!services/evaluator/tests/fixtures/*.json
 
 # Terraform plan artefacts (binary, never commit)
 tfplan*
