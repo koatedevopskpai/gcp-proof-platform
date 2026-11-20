@@ -32,7 +32,16 @@ resource "google_storage_bucket_iam_member" "eval_traces_writer" {
   member = "serviceAccount:${google_service_account.eval_sa.email}"
 }
 
+# The secret became conditional (count). This keeps an existing secret in state instead of destroying and recreating it.
+moved {
+  from = google_secret_manager_secret.judge_api_key
+  to   = google_secret_manager_secret.judge_api_key[0]
+}
+
 resource "google_secret_manager_secret" "judge_api_key" {
+  # Only exists when the OpenAI arm is in use. The default deployment is keyless.
+  count = var.enable_judge ? 1 : 0
+
   secret_id = var.judge_secret_id
 
   replication {
@@ -47,7 +56,7 @@ resource "google_secret_manager_secret" "judge_api_key" {
 resource "google_secret_manager_secret_iam_member" "eval_sa_accessor" {
   count = var.enable_judge ? 1 : 0
 
-  secret_id = google_secret_manager_secret.judge_api_key.id
+  secret_id = google_secret_manager_secret.judge_api_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.eval_sa.email}"
 }

@@ -63,7 +63,7 @@ def build_provenance(dataset: Path) -> dict:
         "run_id": str(uuid.uuid4()),
         "evaluated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "arm": judge.arm,
-        "judge_model": judge.model if judge.arm == "provider" else None,
+        "judge_model": judge.judge_model,
         "dataset": dataset.name,
         "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
         "git_commit": _git_commit(),
@@ -195,7 +195,7 @@ def main() -> int:
     report_block = {
         "judge": {
             "arm": judge.arm,
-            "model": judge.model if judge.arm == "provider" else None,
+            "model": judge.judge_model,
             "faithfulness": round(judge_faithfulness, 4),
             "answer_relevancy": round(judge_relevancy, 4),
         },

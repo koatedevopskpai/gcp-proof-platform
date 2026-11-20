@@ -64,8 +64,16 @@ resource "google_cloud_run_v2_job" "eval_to_bq" {
           value = google_bigquery_table.eval_reports.table_id
         }
         env {
-          name  = "JUDGE_MODEL"
-          value = var.judge_model
+          name  = "JUDGE_ARM"
+          value = var.judge_arm
+        }
+        # Only the OpenAI judge needs a model name. The keyless arms must not carry a stale one.
+        dynamic "env" {
+          for_each = var.judge_arm == "openai" ? [1] : []
+          content {
+            name  = "JUDGE_MODEL"
+            value = var.judge_model
+          }
         }
         env {
           name  = "SCORING_ARM"
