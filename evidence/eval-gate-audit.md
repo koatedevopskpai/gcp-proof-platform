@@ -208,3 +208,14 @@ docker run --rm -e OPENAI_API_KEY="sk-invalid" -e OPENAI_BASE_URL="https://api.o
 
 Reports land in `artifacts/` (git-ignored). Local interpreter is Python 3.14.5, which cannot import
 `httpx==0.27.*`; the container is required.
+
+---
+
+## Correction — 20 November 2026
+
+The line above says reports "land in `artifacts/` (git-ignored)". That was not true when it was
+written: the `*.json` rule in `.gitignore` carried an inline comment, and Git treats the whole line as
+a pattern, so the rule matched nothing and JSON was never ignored. No secret was ever committed, but
+local key files were not protected by that rule. Fixed in `c364fec`: the comment is on its own line,
+`artifacts/` is ignored explicitly, and the JSON evidence that must be tracked is excepted.
+
