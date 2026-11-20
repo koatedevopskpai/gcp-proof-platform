@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "run_id": "4f384237-f763-49e0-ac8e-8078d1da7efc",
+    "evaluated_at": "2026-11-18T22:21:37+00:00",
+    "arm": "provider",
+    "judge_model": "gpt-4o-mini",
+    "dataset": "control_verbatim_distracted.jsonl",
+    "dataset_sha256": "9d1de6076c3080da7327fec4c40ffe127b4c2d639936f1a4c2d652bea591599e",
+    "git_commit": "c13c088f7a22aea548ff000a82c562b05a0eb866"
+  },
+  "usage": {
+    "calls": 2,
+    "prompt_tokens": 141,
+    "completion_tokens": 6,
+    "estimated_cost_usd": 2.5e-05,
+    "price_basis_usd_per_m_tokens": {
+      "input": 0.15,
+      "output": 0.6
+    }
+  },
+  "records": 1,
+  "aggregate_score": 1.0,
+  "threshold": 0.8,
+  "passed": true,
+  "metrics": {
+    "mean_faithfulness": 1.0,
+    "mean_answer_relevancy": 1.0
+  },
+  "per_record": [
+    {
+      "question": "When must customer data be deleted after a contract ends?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 0.7058823529411764,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0
+    }
+  ]
+}

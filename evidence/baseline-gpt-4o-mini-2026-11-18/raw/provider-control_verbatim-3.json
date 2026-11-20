@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "run_id": "474099e4-b0cf-4437-99cc-5ba407a5248f",
+    "evaluated_at": "2026-11-18T22:21:28+00:00",
+    "arm": "provider",
+    "judge_model": "gpt-4o-mini",
+    "dataset": "control_verbatim.jsonl",
+    "dataset_sha256": "b7c839241b1b660780de640bd0d1001f7fe3d02a5cd462c147562145d257c4b3",
+    "git_commit": "c13c088f7a22aea548ff000a82c562b05a0eb866"
+  },
+  "usage": {
+    "calls": 2,
+    "prompt_tokens": 125,
+    "completion_tokens": 6,
+    "estimated_cost_usd": 2.2e-05,
+    "price_basis_usd_per_m_tokens": {
+      "input": 0.15,
+      "output": 0.6
+    }
+  },
+  "records": 1,
+  "aggregate_score": 1.0,
+  "threshold": 0.8,
+  "passed": true,
+  "metrics": {
+    "mean_faithfulness": 1.0,
+    "mean_answer_relevancy": 1.0
+  },
+  "per_record": [
+    {
+      "question": "Within how many days of contract termination must customer data be deleted?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0
+    }
+  ]
+}

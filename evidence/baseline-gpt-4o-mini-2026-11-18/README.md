@@ -23,5 +23,9 @@ Only the subtle case moves. In run 5 faithfulness flipped 0.5 -> 0.0 on identica
 
 The lexical arm was also run 3x per dataset: identical every time (`raw/summary-lexical.json`).
 
-Raw per-run reports are in `raw/` with `SHA256SUMS.txt`. They are untracked because the repo
-git-ignores `*.json`; keep them with the Phase 0 pack.
+Raw per-run reports are in `raw/` with `SHA256SUMS.txt` (42 files). Verify them from inside `raw/`, because the
+paths in the checksum file are relative to it:
+
+```bash
+cd raw && sha256sum -c ../SHA256SUMS.txt
+```

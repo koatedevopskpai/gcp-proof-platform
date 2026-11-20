@@ -1,0 +1,63 @@
+{
+  "provenance": {
+    "run_id": "5cbafac7-3cc6-486b-a1a0-6a0a1c6020fc",
+    "evaluated_at": "2026-11-18T22:21:17+00:00",
+    "arm": "provider",
+    "judge_model": "gpt-4o-mini",
+    "dataset": "eval_set.jsonl",
+    "dataset_sha256": "1a01811d931e76e085abc27ec488fdce627ae2f4456f3e77e024fa740f9e0cbb",
+    "git_commit": "c13c088f7a22aea548ff000a82c562b05a0eb866"
+  },
+  "usage": {
+    "calls": 8,
+    "prompt_tokens": 620,
+    "completion_tokens": 24,
+    "estimated_cost_usd": 0.000107,
+    "price_basis_usd_per_m_tokens": {
+      "input": 0.15,
+      "output": 0.6
+    }
+  },
+  "records": 4,
+  "aggregate_score": 0.9375,
+  "threshold": 0.8,
+  "passed": true,
+  "metrics": {
+    "mean_faithfulness": 0.95,
+    "mean_answer_relevancy": 0.925
+  },
+  "per_record": [
+    {
+      "question": "What is the refund window for purchased items?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 0.3225806451612903,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0
+    },
+    {
+      "question": "How does the system detect drift in model performance?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 0.5405405405405406,
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9
+    },
+    {
+      "question": "Which vector store does the platform use?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 0.4,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0
+    },
+    {
+      "question": "How is retrieval quality measured in CI?",
+      "map@4": 1.0,
+      "ndcg@4": 1.0,
+      "rouge_l": 0.38095238095238093,
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.8
+    }
+  ]
+}

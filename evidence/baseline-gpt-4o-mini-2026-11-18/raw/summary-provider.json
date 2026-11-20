@@ -1,0 +1,113 @@
+{
+  "arm": "provider",
+  "model": "gpt-4o-mini",
+  "runs_per_dataset": 5,
+  "datasets": {
+    "eval_set": {
+      "runs": 5,
+      "errors": 0,
+      "exit_codes": [
+        0
+      ],
+      "passed_all": true,
+      "cost_usd": 0.000535,
+      "calls": 40,
+      "scores": [
+        0.9375,
+        0.9375,
+        0.9375,
+        0.9375,
+        0.9375
+      ],
+      "median": 0.9375,
+      "min": 0.9375,
+      "max": 0.9375,
+      "spread": 0.0
+    },
+    "control_verbatim": {
+      "runs": 5,
+      "errors": 0,
+      "exit_codes": [
+        0
+      ],
+      "passed_all": true,
+      "cost_usd": 0.00011,
+      "calls": 10,
+      "scores": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "median": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "spread": 0.0
+    },
+    "control_verbatim_distracted": {
+      "runs": 5,
+      "errors": 0,
+      "exit_codes": [
+        0
+      ],
+      "passed_all": true,
+      "cost_usd": 0.000125,
+      "calls": 10,
+      "scores": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "median": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "spread": 0.0
+    },
+    "control_unsupported": {
+      "runs": 5,
+      "errors": 0,
+      "exit_codes": [
+        1
+      ],
+      "passed_all": false,
+      "cost_usd": 0.000125,
+      "calls": 10,
+      "scores": [
+        0.4,
+        0.4,
+        0.4,
+        0.4,
+        0.4
+      ],
+      "median": 0.4,
+      "min": 0.4,
+      "max": 0.4,
+      "spread": 0.0
+    },
+    "control_unsupported_subtle": {
+      "runs": 5,
+      "errors": 0,
+      "exit_codes": [
+        1
+      ],
+      "passed_all": false,
+      "cost_usd": 0.00013,
+      "calls": 10,
+      "scores": [
+        0.65,
+        0.65,
+        0.65,
+        0.6,
+        0.4
+      ],
+      "median": 0.65,
+      "min": 0.4,
+      "max": 0.65,
+      "spread": 0.25
+    }
+  },
+  "total_cost_usd": 0.001025
+}
