@@ -33,6 +33,26 @@ per arm), and `eval-to-bq-jxnnw` hit an `APITimeoutError` on a trace call and lo
 (trace failures are now recorded per case instead of aborting, and the client timeout is 180s with
 four retries).
 
+## Keyless by default — 20 November 2026
+
+The judge arm and the scoring arm are now separate settings. `JUDGE_ARM=lexical` (default) keeps the
+gate's report free and independent; `SCORING_ARM=vertex` puts the spend where it buys something.
+`JUDGE_MODEL` is emitted only for the openai arm, and the judge secret is destroyed by default.
+
+Deployed and executed after that change:
+
+| | |
+|---|---|
+| Execution | `eval-to-bq-8f6bq`, 10:53:36Z → 11:06:31Z, succeeded |
+| Trace | `gs://gcp-proof-platform-eval-traces/ragas/ragas-20261120T105444Z-4df278.jsonl` |
+| BigQuery | 4 rows, run `698f0070-1fa6-4725-9ed9-b37226dcc3d0`, `judge_model=lexical` |
+| Gate report | faithfulness 0.678 — the lexical values, not a model call |
+| Scoring | `arm=vertex`, `gemini-3-flash-preview`, faithfulness 0.8333, `trace_errors=0` |
+| Secret Manager | no secrets in the project |
+
+So the earlier deployed run (`eval-to-bq-sbsvq`) had the gate judge on Vertex; that is no longer the
+default, and the run above is the configuration a reviewer should read.
+
 ## Results
 
 | Run | Arm | Faithfulness | Relevancy | Correctness |
