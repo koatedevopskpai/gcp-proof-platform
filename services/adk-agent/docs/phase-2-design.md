@@ -1,10 +1,9 @@
 # Phase 2 design - asset lookup and escalation
 
-**Status:** scaffolded locally. The tools run against fixtures and a JSONL file; the
-BigQuery adapters are written but have not been run against live tables. A five-question
-routing run matched the intended trajectory in all five cases
-(`evidence/adk-agent/2026-11-23-phase-2-smoke.md`). No Terraform change and no
-deployment is part of this phase yet.
+**Status:** the data plane is live in BigQuery (23 November 2026): `ai_platform.assets`
+and `agent_ops.agent_escalations` exist, are seeded, and were exercised by the agent
+through the real adapters. The service is **not deployed** and retrieval is still the
+local Compose stack. No Cloud Run agent, service account or build step exists yet.
 
 ## Why these two tools
 

@@ -43,7 +43,7 @@ companion to the AWS `ai-platform-proof` project.
 | **Observability** | Availability **SLO**, error-budget alert, ops dashboard (`monitoring.tf`) |
 | **Data perimeter** | **VPC Service Controls** module, org-guarded (`vpcsc.tf`) |
 | **FinOps** | Every resource labelled (`cost_center`, `workload`, `budget_owner`, ...) + **$20/mo budget** with 80%/100% alerts |
-| **Grounded agent (prototype, not deployed)** | ADK agent in `services/adk-agent` calling `rag-api`; retrieval measured with mock vs Vertex `text-embedding-005`, and asset lookup + escalation scaffolded locally (`evidence/adk-agent`) |
+| **Grounded agent (prototype, not deployed)** | ADK agent in `services/adk-agent` calling `rag-api`; retrieval measured with mock vs Vertex `text-embedding-005`; asset lookup and escalation have a live BigQuery data plane (`evidence/adk-agent`) |
 
 ## Cost model (us-central1, always-on)
 

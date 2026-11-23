@@ -146,7 +146,7 @@ It calls Vertex AI and costs a few model tokens. The unit tests never do.
 |---|---|---|
 | 1 | Root agent, `search_knowledge`, input guardrails, local `adk web`, unit tests | built, local |
 | 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
-| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | scaffolded, local; routing verified (5/5), BigQuery adapters untested |
+| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | data plane live in BigQuery; service not deployed |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
 | 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | not started |
 | 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | not started |
