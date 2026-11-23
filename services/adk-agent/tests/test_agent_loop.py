@@ -98,7 +98,7 @@ def test_loop_calls_the_retrieval_tool_then_answers(scripted_agent, monkeypatch)
     agent, llm = scripted_agent
     seen = {}
 
-    def fake_post(url, json, timeout):
+    def fake_post(url, json, timeout, headers=None):
         seen.update(json)
         return FakeResponse()
 
@@ -128,7 +128,7 @@ def test_injection_is_blocked_without_calling_the_model(scripted_agent, monkeypa
 def test_pii_is_redacted_before_the_model_sees_it(scripted_agent, monkeypatch):
     agent, llm = scripted_agent
     monkeypatch.setattr(
-        knowledge.httpx, "post", lambda url, json, timeout: FakeResponse()
+        knowledge.httpx, "post", lambda url, json, timeout, headers=None: FakeResponse()
     )
 
     run_once(agent, "Email a.b@example.com about transformer oil sampling")

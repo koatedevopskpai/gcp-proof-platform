@@ -1,0 +1,3 @@
+project_id    = "gcp-proof-platform"
+agent_invoker = "koatekpai@outlook.com"
+db_tier       = "db-g1-small"

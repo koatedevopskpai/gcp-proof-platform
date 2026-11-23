@@ -7,4 +7,7 @@ pgvector==0.3.*
 pydantic==2.*
 pydantic-settings==2.*
 google-auth==2.*
+# google-auth's Cloud Run metadata detection needs requests; without it,
+# google.auth.default() reports "default credentials not found".
+requests==2.*
 httpx==0.27.*

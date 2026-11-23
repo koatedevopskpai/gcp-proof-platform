@@ -9,6 +9,30 @@ import httpx
 
 from support_agent.config import settings
 
+METADATA_IDENTITY_URL = (
+    "http://metadata.google.internal/computeMetadata/v1/instance/"
+    "service-accounts/default/identity"
+)
+
+
+def _authorization_headers() -> dict:
+    """Return an ID token for rag-api when an audience is configured.
+
+    On Cloud Run the metadata server is the identity source; there is no key. If
+    the audience is unset (local Compose), the call stays unauthenticated.
+    """
+    audience = settings.rag_api_audience
+    if not audience:
+        return {}
+    response = httpx.get(
+        METADATA_IDENTITY_URL,
+        params={"audience": audience, "format": "full"},
+        headers={"Metadata-Flavor": "Google"},
+        timeout=5.0,
+    )
+    response.raise_for_status()
+    return {"Authorization": f"Bearer {response.text.strip()}"}
+
 
 def search_knowledge(query: str, top_k: int | None = None) -> dict:
     """Search the asset knowledge base for passages relevant to a question.
@@ -43,6 +67,7 @@ def search_knowledge(query: str, top_k: int | None = None) -> dict:
         response = httpx.post(
             f"{settings.rag_api_url.rstrip('/')}/search",
             json={"query": query, "top_k": k},
+            headers=_authorization_headers(),
             timeout=settings.rag_api_timeout_s,
         )
         response.raise_for_status()

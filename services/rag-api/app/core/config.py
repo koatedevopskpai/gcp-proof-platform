@@ -7,7 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://ai:ai@localhost:5432/aiplatform"
+    database_url: str = ""
+    db_host: str = ""
+    db_port: int = 5432
+    db_name: str = "aiplatform"
+    db_user: str = ""
+    db_password: str = ""
+    db_auto_init: bool = True
     embedding_mode: Literal["mock", "openai", "vertex"] = "mock"
     embedding_dim: int = Field(default=384, ge=1, le=2_000)
     embedding_model: str = "text-embedding-3-small"
