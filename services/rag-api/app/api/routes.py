@@ -3,10 +3,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.db import get_db
 from app.models import Document
-from app.services.embedding import embedding_service
+from app.services.embedding import RETRIEVAL_QUERY, embedding_service
 from app.services.rag import rag_service
 from app.services.retrieval import RetrievalService
 
@@ -31,7 +30,12 @@ class QueryRequest(BaseModel):
 @router.get("/health")
 def health(db: Session = Depends(get_db)) -> dict:
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "embedding_mode": settings.embedding_mode}
+    return {
+        "status": "ok",
+        "embedding_mode": embedding_service.mode,
+        "embedding_model": embedding_service.embedding_model,
+        "embedding_dim": embedding_service.dim,
+    }
 
 
 @router.post("/ingest", response_model=IngestResponse)
@@ -48,13 +52,13 @@ def ingest(req: IngestRequest, db: Session = Depends(get_db)) -> IngestResponse:
 
 @router.post("/search")
 def search(req: QueryRequest, db: Session = Depends(get_db)) -> dict:
-    qvec = embedding_service.embed(req.query)
+    qvec = embedding_service.embed(req.query, task=RETRIEVAL_QUERY)
     results = RetrievalService(db).search(qvec, top_k=req.top_k, query_text=req.query)
     return {"query": req.query, "results": results, "count": len(results)}
 
 
 @router.post("/rag")
 def rag(req: QueryRequest, db: Session = Depends(get_db)) -> dict:
-    qvec = embedding_service.embed(req.query)
+    qvec = embedding_service.embed(req.query, task=RETRIEVAL_QUERY)
     contexts = RetrievalService(db).search(qvec, top_k=req.top_k, query_text=req.query)
     return rag_service.answer(req.query, contexts)

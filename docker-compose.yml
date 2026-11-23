@@ -24,7 +24,11 @@ services:
     build: ./services/rag-api
     environment:
       DATABASE_URL: postgresql+psycopg://ai:ai@postgres:5432/aiplatform
-      EMBEDDING_MODE: mock
+      EMBEDDING_MODE: ${EMBEDDING_MODE:-mock}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-384}
+      VERTEX_PROJECT: ${VERTEX_PROJECT:-${GOOGLE_CLOUD_PROJECT:-}}
+      VERTEX_LOCATION: ${VERTEX_LOCATION:-us-central1}
+      VERTEX_EMBEDDING_MODEL: ${VERTEX_EMBEDDING_MODEL:-text-embedding-005}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       EVALUATOR_URL: http://evaluator:8001
