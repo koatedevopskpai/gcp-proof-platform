@@ -6,10 +6,10 @@ Vertex AI. This is the third arm of the proof platform: the retrieval API answer
 "what does the corpus say", the evaluator scores answers, and this service decides
 what to do with a user's question.
 
-**Status: phase 2 scaffolded locally.** Phase 1 and its retrieval checks are done;
-the phase-2 tools run against fixtures and a local JSONL file. The BigQuery adapters
-are written but untested against live tables. Nothing is deployed. See
-[Phase plan](#phase-plan).
+**Status: phase 2 deployed for a five-day demo (23–28 November 2026).** Phase 1 and
+its retrieval checks are done. The phase-2 tools run live against BigQuery and Cloud
+SQL on Cloud Run, keyless, behind IAM. The deployment is temporary; see
+[Live demo](#live-demo-five-days).
 
 ## What it does
 
@@ -90,12 +90,35 @@ pytest -q
 | `GOOGLE_CLOUD_LOCATION` | `global`; `gemini-3-flash-preview` is global-only |
 | `AGENT_MODEL` | model id, default `gemini-3-flash-preview` |
 | `RAG_API_URL` | default `http://localhost:8010` (the Compose port) |
+| `RAG_API_AUDIENCE` | when set, fetch an ID token for this audience (deployed Cloud Run) |
 | `ASSETS_SOURCE` | `memory` (fixtures) or `bigquery` for `lookup_record` |
 | `ESCALATION_SINK` | `file` (local JSONL) or `bigquery` for `escalate` |
 | `ESCALATION_FILE` | local sink path, default `artifacts/escalations.jsonl` |
 | `BQ_PROJECT` | defaults to `GOOGLE_CLOUD_PROJECT` |
-| `ASSETS_DATASET` / `ASSETS_TABLE` | default `ai_platform` / `assets` |
+| `ASSETS_DATASET` / `ASSETS_TABLE` | default `agent_data` / `assets` |
 | `ESCALATIONS_DATASET` / `ESCALATIONS_TABLE` | default `agent_ops` / `agent_escalations` |
+
+## Live demo (five days)
+
+Deployed on 23 November 2026 and scheduled for destruction on **28 November 2026**.
+The Terraform root is `infra/terraform/environments/agent-demo`; it is isolated from
+the `dev` environment and has its own state.
+
+- `agent-demo-adk`: Cloud Run agent, IAM only, max one instance (in-memory sessions).
+- `agent-demo-rag-api`: Cloud Run retrieval, IAM only; the agent service account is
+  the sole invoker.
+- `agent-demo-pg`: Cloud SQL Postgres 16, pgvector, **private IP only**.
+- `agent_demo_data.assets` and `agent_demo_ops.agent_escalations`.
+- No service-account keys, no `allUsers`, no API key in either service.
+
+The human can mint an ID token only for `agent-demo-invoker`, which can only invoke
+the agent. The agent fetches its own ID token for `rag-api` from the metadata server.
+Commands, cost and teardown are in
+[`infra/terraform/environments/agent-demo/README.md`](../../infra/terraform/environments/agent-demo/README.md);
+the evidence is in
+[`evidence/adk-agent/2026-11-23-keyless-cloudrun-demo.md`](../../evidence/adk-agent/2026-11-23-keyless-cloudrun-demo.md).
+
+Destroy with `.\scripts\agent-demo-down.ps1`.
 
 ## Phase 2 tools
 
@@ -146,10 +169,10 @@ It calls Vertex AI and costs a few model tokens. The unit tests never do.
 |---|---|---|
 | 1 | Root agent, `search_knowledge`, input guardrails, local `adk web`, unit tests | built, local |
 | 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
-| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | data plane live in BigQuery; service not deployed |
+| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | deployed for a five-day demo; live BigQuery and Cloud SQL |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
 | 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | not started |
-| 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | not started |
+| 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | Terraform deploy and receipt done; Cloud Build step not added; teardown due 28 Nov 2026 |
 
 Deployment notes for phase 5: the service must run as a dedicated service account
 with `roles/aiplatform.user` and no key file, reach `rag-api` over its private or

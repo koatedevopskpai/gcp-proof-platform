@@ -1,9 +1,11 @@
 # Phase 2 design - asset lookup and escalation
 
-**Status:** the data plane is live in BigQuery (23 November 2026): `ai_platform.assets`
-and `agent_ops.agent_escalations` exist, are seeded, and were exercised by the agent
-through the real adapters. The service is **not deployed** and retrieval is still the
-local Compose stack. No Cloud Run agent, service account or build step exists yet.
+**Status:** deployed for a five-day demo (23–28 November 2026). The agent runs on
+Cloud Run with no service-account keys and no `allUsers`; `rag-api` is behind Cloud
+Run IAM with private Cloud SQL (pgvector). The data plane is `agent_demo_data` /
+`agent_demo_ops`, isolated from `dev`. Evidence:
+`evidence/adk-agent/2026-11-23-keyless-cloudrun-demo.md`. Destroy on 28 November with
+`scripts/agent-demo-down.ps1`.
 
 ## Why these two tools
 
