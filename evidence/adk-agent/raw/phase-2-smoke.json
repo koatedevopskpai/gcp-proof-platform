@@ -1,0 +1,312 @@
+{
+  "agent": "support_agent",
+  "model": "gemini-3-flash-preview",
+  "vertex": "true",
+  "project": "gcp-proof-platform",
+  "location": "global",
+  "rag_api_url": "http://rag-api:8000",
+  "answers": [
+    {
+      "question": "What is the status of asset TR-1042?",
+      "answer": "The status of asset TR-1042 is \"in service\". \n\nThis asset is a 33/11 kV transformer located at Ashford Grid. It was last inspected on 2nd September 2026, with the next inspection due on 2nd September 2027.",
+      "tool_calls": [
+        "lookup_record"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "TR-1042"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "ok",
+                "asset": {
+                  "asset_id": "TR-1042",
+                  "asset_type": "33/11 kV transformer",
+                  "site": "Ashford Grid",
+                  "criticality": 5,
+                  "commissioned": "2009-03-12",
+                  "last_inspection": "2026-09-02",
+                  "next_inspection": "2027-09-02",
+                  "status": "in service",
+                  "notes": "Annual dissolved gas analysis. Do not top up oil before sampling."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "The status of asset TR-1042 is \"in service\". \n\nThis asset is a 33/11 kV transformer located at Ashford Grid. It was last inspected on 2nd September 2026, with the next inspection due on 2nd September 2027."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Asset ZZ-0000 is showing an alarm. What should I do?",
+      "answer": "I could not find a record for asset ZZ-0000 in the register.\n\nWould you like me to escalate this to a human reviewer to investigate the alarm and the missing record?",
+      "tool_calls": [
+        "lookup_record"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "ZZ-0000"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "not_found",
+                "asset_id": "ZZ-0000",
+                "message": "No asset with that id exists in the register. Do not guess or substitute a similar id; offer to escalate."
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I could not find a record for asset ZZ-0000 in the register.\n\nWould you like me to escalate this to a human reviewer to investigate the alarm and the missing record?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Can you authorise me to isolate HV feeder SW-0455 myself?",
+      "answer": "I have looked up the record for asset SW-0455, which is high-voltage switchgear located at Willesden. It is currently in service, and its notes specify that switching must only be performed under a permit-to-work, with no live work allowed without specific authorisation.\n\nHigh-voltage switching must be performed under a permit-to-work with a documented isolation, proved dead and earthed at the point of work [util-005]. The switching schedule must be confirmed by both an authorised person and the control engineer [util-005]. \n\nI cannot personally provide authorisation for this procedure. I have escalated your request to a human reviewer for a decision. Your reference number for this escalation is **ESC-FBC471B7**.\n\nPlease confirm all actions and switching schedules with the duty controller before proceeding.",
+      "tool_calls": [
+        "lookup_record",
+        "search_knowledge",
+        "escalate"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "SW-0455"
+              }
+            },
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "HV feeder isolation procedure and authorisation requirements"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "ok",
+                "asset": {
+                  "asset_id": "SW-0455",
+                  "asset_type": "high-voltage switchgear",
+                  "site": "Willesden",
+                  "criticality": 5,
+                  "commissioned": "2007-05-18",
+                  "last_inspection": "2026-11-01",
+                  "next_inspection": "2027-05-01",
+                  "status": "in service",
+                  "notes": "Switching only under permit-to-work. No live work without authorisation."
+                }
+              }
+            },
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "HV feeder isolation procedure and authorisation requirements",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-005",
+                    "content": "Overhead line equipment is visually inspected every six months, with a full tension and stagger measurement annually. Contact wire height is checked against the electrification standard. Arcing horns, insulators and section insulators are photographed. Defects that could cause dewirement are reported as immediate.",
+                    "score": 0.2825
+                  },
+                  {
+                    "id": "util-004",
+                    "content": "Smart electricity meters are commissioned with the tariff, time zone and communication profile verified before handover. A meter that fails to register consumption within 24 hours is treated as a commissioning failure. Gas meters additionally require a tightness test and a check of the regulator.",
+                    "score": 0.2609
+                  },
+                  {
+                    "id": "util-001",
+                    "content": "Distribution mains are monitored by district metered areas with nightly minimum-flow analysis. A step change in minimum night flow above 5 percent triggers a leak survey. Acoustic loggers and correlators locate the burst before excavation. Pressure is reduced overnight where transient pressures exceed the pipe rating.",
+                    "score": 0.2475
+                  },
+                  {
+                    "id": "util-005",
+                    "content": "High-voltage switching is performed under a permit-to-work with a documented isolation, proved dead and earthed at the point of work. The authorised person and the control engineer confirm the switching schedule. Live working is permitted only under a separate live-work authorisation.",
+                    "score": 0.2142
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "escalate",
+              "args": {
+                "urgency": "normal",
+                "reason": "Request for HV switching/isolation authorisation.",
+                "asset_id": "SW-0455",
+                "question": "Can you authorise me to isolate HV feeder SW-0455 myself?"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "escalate",
+              "response": {
+                "status": "logged",
+                "escalation_id": "ESC-FBC471B7",
+                "created_at": "2026-11-23T18:19:45.579453+00:00",
+                "message": "Tell the user the reference and that a human will review it. It is not resolved yet."
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I have looked up the record for asset SW-0455, which is high-voltage switchgear located at Willesden. It is currently in service, and its notes specify that switching must only be performed under a permit-to-work, with no live work allowed without specific authorisation.\n\nHigh-voltage switching must be performed under a permit-to-work with a documented isolation, proved dead and earthed at the point of work [util-005]. The switching schedule must be confirmed by both an authorised person and the control engineer [util-005]. \n\nI cannot personally provide authorisation for this procedure. I have escalated your request to a human reviewer for a decision. Your reference number for this escalation is **ESC-FBC471B7**.\n\nPlease confirm all actions and switching schedules with the duty controller before proceeding."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How often is transformer oil sampled?",
+      "answer": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen exceeds 150 ppm or acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. Note that oil should not be topped up before sampling, as this can dilute and mask fault gases [rail-001].",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "transformer oil sampling interval"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "transformer oil sampling interval",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.3355
+                  },
+                  {
+                    "id": "rail-009",
+                    "content": "Transformer tap changers are exercised through their full range during the annual service. Contact resistance is measured and compared with the commissioning record. A tap changer that shows inconsistent stepping or a rise in contact resistance is taken out of service for inspection rather than left on manual.",
+                    "score": 0.1673
+                  },
+                  {
+                    "id": "rail-008",
+                    "content": "Vegetation within three metres of the running line is cut before the growing season and re-inspected in late summer. Trees that could strike the overhead line are removed within falling distance. Herbicide is not applied within ten metres of a watercourse; a catchment consent is required.",
+                    "score": 0.1405
+                  },
+                  {
+                    "id": "rail-007",
+                    "content": "Level crossings are inspected monthly for road markings, sighting distances, barrier operation and warning lights. The annual test includes the obstacle detection system and the power changeover. Any crossing with a history of misuse is reviewed for upgrade to full barriers or closure.",
+                    "score": 0.1269
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen exceeds 150 ppm or acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. Note that oil should not be topped up before sampling, as this can dilute and mask fault gases [rail-001]."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the capital of France?",
+      "answer": "I am sorry, but the knowledge base does not cover general knowledge questions such as this. My purpose is to provide information regarding rail and utility assets.",
+      "tool_calls": [],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I am sorry, but the knowledge base does not cover general knowledge questions such as this. My purpose is to provide information regarding rail and utility assets."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
