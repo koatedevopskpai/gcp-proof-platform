@@ -6,8 +6,10 @@ Vertex AI. This is the third arm of the proof platform: the retrieval API answer
 "what does the corpus say", the evaluator scores answers, and this service decides
 what to do with a user's question.
 
-**Status: phase 1 (retrieval agent), local only.** Nothing is deployed yet and no
-deployment is claimed. See [Phase plan](#phase-plan).
+**Status: phase 2 scaffolded locally.** Phase 1 and its retrieval checks are done;
+the phase-2 tools run against fixtures and a local JSONL file. The BigQuery adapters
+are written but untested against live tables. Nothing is deployed. See
+[Phase plan](#phase-plan).
 
 ## What it does
 
@@ -18,6 +20,8 @@ user question
 root LLM agent (Gemini)
    |-- before_model_callback: blocks prompt injection, redacts email/phone/card
    |-- search_knowledge(query, top_k) --> rag-api POST /search
+   |-- lookup_record(asset_id) --------> asset register (read-only)
+   |-- escalate(reason, question) -----> human-in-the-loop record, status=open
    v
 grounded answer with [doc-id] citations, or an explicit "not in the knowledge base"
 ```
@@ -32,10 +36,15 @@ without changing its tools.
 services/adk-agent/
   support_agent/
     agent.py          # root_agent: the graph
-    prompts.py        # grounding and safety rules
+    prompts.py        # grounding, safety and escalation rules
     guardrails.py     # before_model_callback
     config.py         # env-backed settings
     tools/knowledge.py# search_knowledge -> POST /search
+    tools/records.py  # lookup_record -> AssetRepository
+    tools/escalation.py # escalate -> EscalationSink
+    adapters/         # memory/BigQuery seams for assets and escalations
+    data/assets.py    # synthetic asset fixtures
+  docs/phase-2-design.md
   scripts/smoke.py    # one-shot real-model run that records tool calls and answers
   tests/              # no network, no model calls
   requirements.txt
@@ -81,6 +90,25 @@ pytest -q
 | `GOOGLE_CLOUD_LOCATION` | `global`; `gemini-3-flash-preview` is global-only |
 | `AGENT_MODEL` | model id, default `gemini-3-flash-preview` |
 | `RAG_API_URL` | default `http://localhost:8010` (the Compose port) |
+| `ASSETS_SOURCE` | `memory` (fixtures) or `bigquery` for `lookup_record` |
+| `ESCALATION_SINK` | `file` (local JSONL) or `bigquery` for `escalate` |
+| `ESCALATION_FILE` | local sink path, default `artifacts/escalations.jsonl` |
+| `BQ_PROJECT` | defaults to `GOOGLE_CLOUD_PROJECT` |
+| `ASSETS_DATASET` / `ASSETS_TABLE` | default `ai_platform` / `assets` |
+| `ESCALATIONS_DATASET` / `ESCALATIONS_TABLE` | default `agent_ops` / `agent_escalations` |
+
+## Phase 2 tools
+
+`lookup_record` returns one asset by id and never accepts SQL. `escalate` writes a
+record with `status=open`, redacts email/phone/card numbers again before storage, and
+returns a reference; if the sink fails it says so rather than pretending a ticket
+exists. Both fail closed.
+
+Local defaults use the synthetic fixtures and `artifacts/escalations.jsonl`.
+`ASSETS_SOURCE=bigquery` and `ESCALATION_SINK=bigquery` select the cloud adapters;
+missing project configuration stops the service at startup. Tool contracts, the data
+model, IAM shape and the phase-4 eval cases are in
+[`docs/phase-2-design.md`](docs/phase-2-design.md).
 
 ## The mock-embedding caveat
 
@@ -118,7 +146,7 @@ It calls Vertex AI and costs a few model tokens. The unit tests never do.
 |---|---|---|
 | 1 | Root agent, `search_knowledge`, input guardrails, local `adk web`, unit tests | built, local |
 | 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
-| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | not started |
+| 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | scaffolded, local; routing verified (5/5), BigQuery adapters untested |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
 | 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | not started |
 | 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | not started |

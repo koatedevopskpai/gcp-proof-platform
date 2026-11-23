@@ -11,7 +11,8 @@ def test_root_agent_is_named_and_configured():
 
 def test_retrieval_tool_is_registered():
     tools = asyncio.run(root_agent.canonical_tools())
-    assert "search_knowledge" in {tool.name for tool in tools}
+    names = {tool.name for tool in tools}
+    assert {"search_knowledge", "lookup_record", "escalate"} <= names
 
 
 def test_guardrail_is_wired():

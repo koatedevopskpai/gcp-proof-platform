@@ -1,0 +1,10 @@
+[
+  {"name": "escalation_id", "type": "STRING", "mode": "REQUIRED", "description": "Reference given to the user, e.g. ESC-1A2B3C4D"},
+  {"name": "created_at", "type": "TIMESTAMP", "mode": "REQUIRED"},
+  {"name": "asset_id", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "reason", "type": "STRING", "mode": "REQUIRED", "description": "Short hand-off reason"},
+  {"name": "question", "type": "STRING", "mode": "REQUIRED", "description": "User question, PII-redacted before insert"},
+  {"name": "urgency", "type": "STRING", "mode": "REQUIRED", "description": "low | normal | high"},
+  {"name": "status", "type": "STRING", "mode": "REQUIRED", "description": "open until a human closes it"},
+  {"name": "source", "type": "STRING", "mode": "NULLABLE", "description": "adk-support-agent"}
+]
