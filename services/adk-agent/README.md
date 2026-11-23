@@ -36,6 +36,7 @@ services/adk-agent/
     guardrails.py     # before_model_callback
     config.py         # env-backed settings
     tools/knowledge.py# search_knowledge -> POST /search
+  scripts/smoke.py    # one-shot real-model run that records tool calls and answers
   tests/              # no network, no model calls
   requirements.txt
   requirements-dev.txt
@@ -83,21 +84,40 @@ pytest -q
 
 ## The mock-embedding caveat
 
-The Compose stack sets `EMBEDDING_MODE=mock`: `rag-api` produces deterministic
-stand-in vectors, not semantic embeddings. Retrieval is then a blend of those
-vectors and Postgres full-text search. That is adequate for exercising the agent
-end to end, but "grounded" here means *grounded in the indexed text*, not *embedded
-by a production model*. Do not present a local run as evidence of semantic
-retrieval quality.
+The Compose stack still defaults to `EMBEDDING_MODE=mock`: `rag-api` produces
+deterministic stand-in vectors, not semantic embeddings. That is adequate for
+exercising the agent offline, but "grounded" then means *grounded in the indexed
+text*, not *embedded by a production model*.
 
-The corpus is also empty until documents are ingested through `POST /ingest`.
+`rag-api` now has an explicit `vertex` mode (`text-embedding-005`, runtime
+identity). The same eight queries scored **0.75 hit@1 with mock** and **1.00 hit@1
+with Vertex** over the 19-document seed corpus; the agent's first five questions
+were answered with citations, or declined, as intended. The full record is in
+[`evidence/adk-agent/2026-11-23-embedding-and-smoke.md`](../../evidence/adk-agent/2026-11-23-embedding-and-smoke.md).
+
+To run the agent against semantic retrieval, start `rag-api` with
+`EMBEDDING_MODE=vertex` and a reachable project, ingest the corpus (it embeds at
+ingest time), then point `RAG_API_URL` at that service. See
+`services/rag-api/README.md`. The corpus is synthetic and is not operational
+guidance.
+
+## Smoke run
+
+`scripts/smoke.py` drives the real model through the real tools and writes a JSON
+trace:
+
+```powershell
+python scripts/smoke.py --output ..\..\evidence\adk-agent\raw\adk-smoke-vertex.json
+```
+
+It calls Vertex AI and costs a few model tokens. The unit tests never do.
 
 ## Phase plan
 
 | Phase | Scope | State |
 |---|---|---|
 | 1 | Root agent, `search_knowledge`, input guardrails, local `adk web`, unit tests | built, local |
-| 1b | Seed rail/utility corpus and ingest it | not started |
+| 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
 | 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | not started |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
 | 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | not started |

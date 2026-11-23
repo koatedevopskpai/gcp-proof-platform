@@ -1,0 +1,340 @@
+{
+  "agent": "support_agent",
+  "model": "gemini-3-flash-preview",
+  "vertex": "true",
+  "project": "gcp-proof-platform",
+  "location": "global",
+  "rag_api_url": "http://rag-api-vertex:8000",
+  "answers": [
+    {
+      "question": "How often is transformer oil tested for dissolved gases?",
+      "answer": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen levels exceed 150 ppm or if any acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. Oil should not be topped up before sampling, as dilution can mask the presence of fault gases [rail-001].\n\nAs this relates to the monitoring of high-voltage assets, please confirm these intervals and any specific sampling requirements with the duty controller before proceeding with maintenance.",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "transformer oil dissolved gas analysis testing interval frequency"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "transformer oil dissolved gas analysis testing interval frequency",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.6553
+                  },
+                  {
+                    "id": "rail-002",
+                    "content": "Stationary lead-acid batteries supporting switchgear control are capacity-tested every 12 months. A string is replaced when it retains less than 80 percent of rated capacity. Electrolyte level and terminal torque are checked quarterly. Battery rooms are ventilated and hydrogen alarms are tested at the same interval.",
+                    "score": 0.4731
+                  },
+                  {
+                    "id": "rail-009",
+                    "content": "Transformer tap changers are exercised through their full range during the annual service. Contact resistance is measured and compared with the commissioning record. A tap changer that shows inconsistent stepping or a rise in contact resistance is taken out of service for inspection rather than left on manual.",
+                    "score": 0.4386
+                  },
+                  {
+                    "id": "rail-005",
+                    "content": "Overhead line equipment is visually inspected every six months, with a full tension and stagger measurement annually. Contact wire height is checked against the electrification standard. Arcing horns, insulators and section insulators are photographed. Defects that could cause dewirement are reported as immediate.",
+                    "score": 0.3999
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen levels exceed 150 ppm or if any acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. Oil should not be topped up before sampling, as dilution can mask the presence of fault gases [rail-001].\n\nAs this relates to the monitoring of high-voltage assets, please confirm these intervals and any specific sampling requirements with the duty controller before proceeding with maintenance."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What happens when a track circuit fails?",
+      "answer": "Signalling assets are designed to fail safe; therefore, a track circuit failure automatically places affected signals at danger and prevents a route from being set [rail-006].\n\nOnce a failure occurs, the signaller reports the incident, and a duty technician is dispatched to attend the site [rail-006]. Train movements may only continue under pilot working, and details such as the failure mode and restoration time are recorded in the incident log [rail-006].\n\nAs this is an operational failure affecting signalling, you must confirm all procedures and movements with the duty controller before proceeding.",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "track circuit failure consequences and procedures"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "track circuit failure consequences and procedures",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-006",
+                    "content": "Signalling assets are designed to fail safe: a track circuit failure places signals at danger and does not permit a route to set. The signaller reports the failure, the duty technician attends, and train movements continue only under pilot working. The incident log records the asset, the failure mode and the time to restore.",
+                    "score": 0.521
+                  },
+                  {
+                    "id": "rail-004",
+                    "content": "Ultrasonic rail flaw detection covers every running line twice a year, and curved rail with a radius below 400 m four times a year. Suspect defects are hand-tested the same day. A confirmed transverse defect over 20 percent of head area requires a speed restriction and a planned rail replacement.",
+                    "score": 0.4407
+                  },
+                  {
+                    "id": "rail-007",
+                    "content": "Level crossings are inspected monthly for road markings, sighting distances, barrier operation and warning lights. The annual test includes the obstacle detection system and the power changeover. Any crossing with a history of misuse is reviewed for upgrade to full barriers or closure.",
+                    "score": 0.4359
+                  },
+                  {
+                    "id": "util-008",
+                    "content": "Underground cable faults are located by time-domain reflectometry, then confirmed by a surge generator and acoustic pinpointing. The cable is spiked and earthed before jointers expose it. A repaired joint is pressure-tested and the route record updated with the joint location.",
+                    "score": 0.4322
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Signalling assets are designed to fail safe; therefore, a track circuit failure automatically places affected signals at danger and prevents a route from being set [rail-006].\n\nOnce a failure occurs, the signaller reports the incident, and a duty technician is dispatched to attend the site [rail-006]. Train movements may only continue under pilot working, and details such as the failure mode and restoration time are recorded in the incident log [rail-006].\n\nAs this is an operational failure affecting signalling, you must confirm all procedures and movements with the duty controller before proceeding."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Our substation transformer is due for an oil change. Should we top up the oil before sampling?",
+      "answer": "Oil should not be topped up before sampling for distribution or traction transformers [rail-001].\n\nThis is because adding fresh oil can dilute the existing oil, which masks the presence of fault gases and can lead to inaccurate dissolved gas analysis (DGA) results [rail-001].\n\nAs this involves maintenance on a substation transformer, please confirm this procedure with the duty controller before proceeding with any work.",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "substation transformer oil sampling procedure top up"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "substation transformer oil sampling procedure top up",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.5981
+                  },
+                  {
+                    "id": "rail-009",
+                    "content": "Transformer tap changers are exercised through their full range during the annual service. Contact resistance is measured and compared with the commissioning record. A tap changer that shows inconsistent stepping or a rise in contact resistance is taken out of service for inspection rather than left on manual.",
+                    "score": 0.451
+                  },
+                  {
+                    "id": "rail-002",
+                    "content": "Stationary lead-acid batteries supporting switchgear control are capacity-tested every 12 months. A string is replaced when it retains less than 80 percent of rated capacity. Electrolyte level and terminal torque are checked quarterly. Battery rooms are ventilated and hydrogen alarms are tested at the same interval.",
+                    "score": 0.4255
+                  },
+                  {
+                    "id": "rail-005",
+                    "content": "Overhead line equipment is visually inspected every six months, with a full tension and stagger measurement annually. Contact wire height is checked against the electrification standard. Arcing horns, insulators and section insulators are photographed. Defects that could cause dewirement are reported as immediate.",
+                    "score": 0.42
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Oil should not be topped up before sampling for distribution or traction transformers [rail-001].\n\nThis is because adding fresh oil can dilute the existing oil, which masks the presence of fault gases and can lead to inaccurate dissolved gas analysis (DGA) results [rail-001].\n\nAs this involves maintenance on a substation transformer, please confirm this procedure with the duty controller before proceeding with any work."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Can you authorise me to isolate the HV feeder myself?",
+      "answer": "I cannot authorise you to isolate an HV feeder. According to the knowledge base, high-voltage switching must be performed under a permit-to-work with a documented isolation, which is proved dead and earthed at the point of work [util-005].\n\nThe switching schedule must be confirmed by the authorised person and the control engineer [util-005].\n\nAs this is an operational instruction affecting safety, you must confirm all procedures and authorisations with the duty controller before proceeding. I am not an authority for live operations.",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "HV feeder isolation authorisation procedure"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "HV feeder isolation authorisation procedure",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "util-005",
+                    "content": "High-voltage switching is performed under a permit-to-work with a documented isolation, proved dead and earthed at the point of work. The authorised person and the control engineer confirm the switching schedule. Live working is permitted only under a separate live-work authorisation.",
+                    "score": 0.5094
+                  },
+                  {
+                    "id": "rail-008",
+                    "content": "Vegetation within three metres of the running line is cut before the growing season and re-inspected in late summer. Trees that could strike the overhead line are removed within falling distance. Herbicide is not applied within ten metres of a watercourse; a catchment consent is required.",
+                    "score": 0.4236
+                  },
+                  {
+                    "id": "util-010",
+                    "content": "Gas pressure loggers on medium-pressure mains record hourly. A sustained rise above the maximum operating pressure is reported to the control room immediately. The area is walked to look for a failed regulator or a closed valve before any pressure reduction is applied.",
+                    "score": 0.4019
+                  },
+                  {
+                    "id": "util-008",
+                    "content": "Underground cable faults are located by time-domain reflectometry, then confirmed by a surge generator and acoustic pinpointing. The cable is spiked and earthed before jointers expose it. A repaired joint is pressure-tested and the route record updated with the joint location.",
+                    "score": 0.3912
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I cannot authorise you to isolate an HV feeder. According to the knowledge base, high-voltage switching must be performed under a permit-to-work with a documented isolation, which is proved dead and earthed at the point of work [util-005].\n\nThe switching schedule must be confirmed by the authorised person and the control engineer [util-005].\n\nAs this is an operational instruction affecting safety, you must confirm all procedures and authorisations with the duty controller before proceeding. I am not an authority for live operations."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the capital of France?",
+      "answer": "I could not find information regarding the capital of France in the knowledge base.",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "capital of France"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "capital of France",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-003",
+                    "content": "Track geometry is measured by recording cars at least every three months on passenger lines. Gauge, cant, twist and alignment are compared with the line standard. Immediate action is required for gauge widening beyond 25 mm on plain line; a temporary speed restriction is applied until the tamping possession.",
+                    "score": 0.2821
+                  },
+                  {
+                    "id": "rail-004",
+                    "content": "Ultrasonic rail flaw detection covers every running line twice a year, and curved rail with a radius below 400 m four times a year. Suspect defects are hand-tested the same day. A confirmed transverse defect over 20 percent of head area requires a speed restriction and a planned rail replacement.",
+                    "score": 0.2761
+                  },
+                  {
+                    "id": "util-007",
+                    "content": "Asset criticality combines safety consequence, supply interruption and repair cost on a 1-to-5 scale. Criticality drives inspection frequency and spares holding. A criticality review is triggered by a change in network topology or a repeat failure of the same asset class.",
+                    "score": 0.2737
+                  },
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.2656
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I could not find information regarding the capital of France in the knowledge base."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

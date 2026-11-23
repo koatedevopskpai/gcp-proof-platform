@@ -1,0 +1,164 @@
+{
+  "embedding_mode": "mock",
+  "embedding_model": "mock",
+  "embedding_dim": 384,
+  "top_k": 3,
+  "queries": 8,
+  "hit_at_1": 0.75,
+  "hit_at_k": 1.0,
+  "mrr": 0.875,
+  "results": [
+    {
+      "query": "How often is transformer oil tested for dissolved gases?",
+      "expected": "rail-001",
+      "kind": "direct",
+      "rank": 1,
+      "top": [
+        {
+          "id": "rail-001",
+          "score": 0.3105
+        },
+        {
+          "id": "util-003",
+          "score": 0.191
+        },
+        {
+          "id": "rail-009",
+          "score": 0.1831
+        }
+      ]
+    },
+    {
+      "query": "lubricant analysis frequency for traction units",
+      "expected": "rail-001",
+      "kind": "paraphrase",
+      "rank": 1,
+      "top": [
+        {
+          "id": "rail-001",
+          "score": 0.2221
+        },
+        {
+          "id": "rail-003",
+          "score": 0.1705
+        },
+        {
+          "id": "util-001",
+          "score": 0.1696
+        }
+      ]
+    },
+    {
+      "query": "What happens when a track circuit fails?",
+      "expected": "rail-006",
+      "kind": "direct",
+      "rank": 2,
+      "top": [
+        {
+          "id": "util-004",
+          "score": 0.1664
+        },
+        {
+          "id": "rail-006",
+          "score": 0.1657
+        },
+        {
+          "id": "rail-004",
+          "score": 0.1509
+        }
+      ]
+    },
+    {
+      "query": "How do we locate a burst water main?",
+      "expected": "util-001",
+      "kind": "direct",
+      "rank": 2,
+      "top": [
+        {
+          "id": "rail-002",
+          "score": 0.1654
+        },
+        {
+          "id": "util-001",
+          "score": 0.1576
+        },
+        {
+          "id": "util-009",
+          "score": 0.1556
+        }
+      ]
+    },
+    {
+      "query": "When is a gas governor pressure-tested?",
+      "expected": "util-003",
+      "kind": "direct",
+      "rank": 1,
+      "top": [
+        {
+          "id": "util-003",
+          "score": 0.2897
+        },
+        {
+          "id": "util-010",
+          "score": 0.2809
+        },
+        {
+          "id": "rail-003",
+          "score": 0.1911
+        }
+      ]
+    },
+    {
+      "query": "What is the maximum allowed gauge widening on plain line?",
+      "expected": "rail-003",
+      "kind": "direct",
+      "rank": 1,
+      "top": [
+        {
+          "id": "rail-003",
+          "score": 0.5282
+        },
+        {
+          "id": "rail-008",
+          "score": 0.2593
+        },
+        {
+          "id": "util-010",
+          "score": 0.189
+        }
+      ]
+    },
+    {
+      "query": "How is a rail defect found before it breaks?",
+      "expected": "rail-004",
+      "kind": "paraphrase",
+      "rank": 1,
+      "top": [
+        {
+          "id": "rail-004",
+          "score": 0.2299
+        },
+        {
+          "id": "util-010",
+          "score": 0.1976
+        },
+        {
+          "id": "util-008",
+          "score": 0.1931
+        }
+      ]
+    },
+    {
+      "query": "What keeps SCADA alarms under control?",
+      "expected": "util-006",
+      "kind": "paraphrase",
+      "rank": 1,
+      "top": [
+        {
+          "id": "util-006",
+          "score": 0.1817
+        }
+      ]
+    }
+  ]
+}
