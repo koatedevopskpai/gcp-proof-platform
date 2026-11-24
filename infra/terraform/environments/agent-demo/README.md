@@ -82,7 +82,15 @@ runtime account.
 
 ## Destroy (day 5)
 
+A topmost reminder is registered for **06:00 on 28 November 2026**. It has a
+**Tear down now** button, a one-hour snooze, and a dismiss. The button runs
+`scripts/agent-demo-down.ps1 -Force` after a confirmation dialog.
+
 ```powershell
+# Preview or re-register the reminder
+.\scripts\agent-demo-reminder-setup.ps1
+
+# Or tear down directly
 .\scripts\agent-demo-down.ps1
 ```
 

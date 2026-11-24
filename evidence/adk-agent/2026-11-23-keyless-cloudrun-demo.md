@@ -128,6 +128,10 @@ component that bills while idle, which is why the teardown is a hard step.
 
 ## Teardown
 
+A topmost reminder is registered for **06:00 on 28 November 2026**; its button runs
+the destroy below after a confirmation. Preview it with the desktop shortcut or
+`scripts/agent-demo-reminder-setup.ps1`.
+
 ```powershell
 .\scripts\agent-demo-down.ps1
 ```
