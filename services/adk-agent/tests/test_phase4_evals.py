@@ -1,7 +1,7 @@
 """Phase-4 helpers: the eval set must be valid before it costs a model call."""
 from pathlib import Path
 
-from support_agent.eval_support import (
+from eval_support import (
     build_bq_rows,
     case_expected_tools,
     case_kind,

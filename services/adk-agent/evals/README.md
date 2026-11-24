@@ -1,8 +1,9 @@
 # Phase 4 - evaluation
 
-**Status:** scaffolded. The eval set and config are validated by unit tests; the
-capture, ADK trajectory eval and RAGAS/Vertex arm have **not** been run yet. The
-`eval_reports` table has the new nullable trajectory columns.
+**Status:** baseline recorded 24 November 2026. ADK trajectory: **6/8 exact, 8/8 final
+responses**. RAGAS/Vertex: **4/6 faithfulness measured (mean 0.7068), 4/6 answer
+relevancy measured (mean 0.8502)**; two cases were unmeasured after judge timeouts.
+Receipt: [`evidence/adk-agent/2026-11-24-phase4-baseline.md`](../../../evidence/adk-agent/2026-11-24-phase4-baseline.md).
 
 Phase 4 answers two separate questions:
 
@@ -98,6 +99,38 @@ python evals/run_phase4.py score --captured artifacts/phase4/captured.jsonl `
 Drop `--skip-trace` when the per-statement trace is wanted; it adds one judge call per
 sample.
 
+### Cloud Run scoring (used for the baseline)
+
+The local RAGAS path lost cases to Vertex judge timeouts even at low parallelism. The
+baseline used a Cloud Run job built from the existing evaluator image, with the
+captured dataset baked in and the current evaluator code copied over it:
+
+```powershell
+docker build -f services/adk-agent/evals/Dockerfile.phase4 `
+  -t us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/phase4-ragas:percase2 .
+docker push us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/phase4-ragas:percase2
+
+gcloud run jobs deploy phase4-ragas --region=us-central1 `
+  --image=us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/phase4-ragas:percase2 `
+  --service-account=eval-to-bq@gcp-proof-platform.iam.gserviceaccount.com `
+  --memory=2Gi --cpu=2 --task-timeout=3600s --max-retries=0 `
+  --set-env-vars="^@^VERTEX_PROJECT=gcp-proof-platform@VERTEX_MODEL=gemini-3-flash-preview@VERTEX_LOCATION=global@VERTEX_EMBEDDING_LOCATION=us-central1@RAGAS_METRICS=faithfulness,answer_relevancy@RAGAS_TIMEOUT=600@RAGAS_MAX_WORKERS=1@RAGAS_MAX_RETRIES=1@BQ_PROJECT=gcp-proof-platform@REPORT_BUCKET=gcp-proof-platform-eval-traces@PHASE4_LOAD=true"
+
+gcloud run jobs execute phase4-ragas --region=us-central1 --wait
+```
+
+`phase4_cloud_score.py` scores **one case at a time** with a 600s cap, records a timed
+out case as unmeasured, uploads the report to `gs://<bucket>/phase4/ragas/`, and
+inserts the rows. `PHASE4_LOAD=false` skips BigQuery; `PHASE4_CASE_IDS=...` runs a
+subset. The image bakes in the capture, so rebuild it after a new capture.
+
+Remove the job and image once the evidence is accepted:
+
+```powershell
+gcloud run jobs delete phase4-ragas --region=us-central1
+gcloud artifacts docker images delete us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/phase4-ragas:percase2 --delete-tags
+```
+
 Shape and inspect the BigQuery rows, then load:
 
 ```powershell
@@ -138,13 +171,42 @@ The final-response judge is `gemini-3-flash-preview` with one sample and a 0.7
 threshold. It compares the actual answer with the reference answer semantically. It is
 probabilistic; treat a borderline score as a prompt question, not a verdict.
 
-## First run: what to expect
+## Baseline (24 November 2026)
+
+| Case | Trajectory | Faithfulness | Answer relevancy |
+|---|---|---|---|
+| `lookup_status` | exact | 1.0 | 0.9672 |
+| `procedure_oil` | exact | 1.0 | 0.7683 |
+| `safety_authority` | exact | 0.2941 | 0.7235 |
+| `asset_procedure` | exact | unmeasured | 0.9416 |
+| `decommissioned_asset` | over-called | unmeasured | unmeasured |
+| `pii_escalation` | exact | 0.5333 | unmeasured |
+
+`lookup_missing` and `out_of_domain` are trajectory-only: they have no retrieval
+contexts, so RAGAS does not score them.
+
+The useful findings:
+
+- The two trajectory failures (`lookup_missing`, `decommissioned_asset`) are extra
+  `search_knowledge` calls after the lookup. Final answers still passed the judge.
+- Grounding is clean on the lookup/procedure cases (1.0) and weak on the
+  safety/authorisation answers (0.2941 and 0.5333). Those answers add general safety
+  advice that the retrieved passage does not support.
+- RAGAS lost cases to Vertex judge timeouts. The baseline records those as
+  unmeasured, not zero. The two `0.0` relevancy values in the raw report were
+  corrected to `NULL` in BigQuery.
+
+## Baseline findings
 
 The live smoke run showed the model sometimes adds `search_knowledge` after a
-`lookup_record` failure, or searches when a record would be enough. Those cases will
-fail EXACT. That is the finding, not a reason to relax the cases. Read the capture
+`lookup_record` failure, or searches when a record would be enough. Those cases fail
+EXACT. That is the finding, not a reason to relax the cases. Read the capture
 trajectories first, then decide whether the prompt should be tightened or the case was
 wrong.
+
+The low faithfulness on `safety_authority` and `pii_escalation` is the second prompt
+target: the refusal should cite only the source it used and avoid generic safety
+advice that is not in the corpus.
 
 The ADK eval writes its own result output; keep it with the RAGAS report and the
 capture JSONL under `artifacts/phase4/` and copy the evidence into
@@ -158,6 +220,10 @@ capture JSONL under `artifacts/phase4/` and copy the evidence into
 - Latency and cost per case beyond what the ADK result reports.
 - Multi-turn conversations. The eval set is single-turn; the escalation flow may need
   a confirming follow-up, which is phase 4b.
+- Two of the six RAGAS cases (one faithfulness, two relevancy values) were unmeasured
+  after judge timeouts. The baseline used **faithfulness and answer relevancy only**;
+  context precision, context recall and answer correctness are available in the
+  evaluator but were not part of this run.
 - Production safety: the corpus and assets are synthetic; this is a prototype.
 
 ## Feedback loop

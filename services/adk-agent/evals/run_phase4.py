@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SERVICE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SERVICE_ROOT))
 
-from support_agent.eval_support import (  # noqa: E402
+from eval_support import (  # noqa: E402
     build_bq_rows,
     case_expected_tools,
     case_kind,
@@ -139,13 +139,32 @@ async def _capture_all(evalset_path: Path, limit: int | None) -> None:
     print(f"wrote {OUT / 'trajectory.json'}")
 
 
+def _ragas_eligible(captured: Path) -> Path:
+    """RAGAS needs contexts; trajectory-only cases (not-found, out-of-domain) are skipped."""
+    rows = [
+        json.loads(line)
+        for line in captured.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    eligible = [row for row in rows if row.get("contexts")]
+    if len(eligible) == len(rows):
+        return captured
+
+    target = captured.with_name(captured.stem + "-ragas.jsonl")
+    write_jsonl(target, eligible)
+    skipped = [row["case_id"] for row in rows if not row.get("contexts")]
+    print(f"RAGAS: skipping {len(skipped)} case(s) with no contexts: {', '.join(skipped)}")
+    return target
+
+
 def _score(captured: Path, arm: str, label: str, out: Path, skip_trace: bool) -> Path:
     script = ROOT / "scripts" / "ragas_run.py"
+    dataset = _ragas_eligible(captured)
     command = [
         sys.executable,
         str(script),
         "--dataset",
-        str(captured),
+        str(dataset),
         "--arm",
         arm,
         "--label",

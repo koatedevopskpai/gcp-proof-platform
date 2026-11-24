@@ -43,7 +43,7 @@ companion to the AWS `ai-platform-proof` project.
 | **Observability** | Availability **SLO**, error-budget alert, ops dashboard (`monitoring.tf`) |
 | **Data perimeter** | **VPC Service Controls** module, org-guarded (`vpcsc.tf`) |
 | **FinOps** | Every resource labelled (`cost_center`, `workload`, `budget_owner`, ...) + **$20/mo budget** with 80%/100% alerts |
-| **Grounded agent (five-day demo, separate from the always-on stack)** | ADK agent deployed keyless to Cloud Run (23–28 Nov 2026) with IAM-only access, private Cloud SQL + pgvector, and live BigQuery assets/escalations; retrieval measured with mock vs Vertex `text-embedding-005` (`evidence/adk-agent`) |
+| **Grounded agent (five-day demo, separate from the always-on stack)** | ADK agent deployed keyless to Cloud Run (23–28 Nov 2026) with IAM-only access, private Cloud SQL + pgvector, and live BigQuery assets/escalations; phase-4 baseline: 6/8 exact tool trajectories, 8/8 final responses, 4/6 RAGAS faithfulness measured (`evidence/adk-agent`) |
 
 ## Cost model (us-central1, always-on)
 

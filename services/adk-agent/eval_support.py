@@ -1,4 +1,4 @@
-"""Pure helpers for phase-4 evaluation: case access, trajectory comparison, BQ rows.
+﻿"""Pure helpers for phase-4 evaluation: case access, trajectory comparison, BQ rows.
 
 The ADK evaluator owns the official trajectory score. These helpers are used by the
 capture runner to record the same facts for RAGAS and for the BigQuery row shape.

@@ -1,0 +1,13 @@
+# Phase-4 scoring job: the existing evaluator image plus the captured baseline.
+FROM us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/eval-to-bq:latest
+
+# Replace the image's evaluator with the current code (RunConfig and metric selection).
+RUN rm -rf /app/evaluator
+COPY services/evaluator/evaluator /app/evaluator
+
+COPY services/adk-agent/eval_support.py /app/eval_support.py
+COPY services/adk-agent/evals/phase4_cloud_score.py /app/phase4_cloud_score.py
+COPY services/adk-agent/artifacts/phase4/captured-ragas.jsonl /app/phase4/captured.jsonl
+COPY services/adk-agent/artifacts/phase4/trajectory.json /app/phase4/trajectory.json
+
+ENTRYPOINT ["python", "/app/phase4_cloud_score.py"]
