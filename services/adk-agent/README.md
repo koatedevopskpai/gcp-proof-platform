@@ -120,6 +120,18 @@ the evidence is in
 
 Destroy with `.\scripts\agent-demo-down.ps1`.
 
+## Phase 4 evaluation
+
+`evals/` contains eight ADK trajectory cases, a capture runner that records the
+agent's answers and retrieved contexts for RAGAS, and a loader that writes one row per
+case into `ai_platform.eval_reports`. The table has nullable trajectory columns
+(`case_kind`, `expected_tools`, `actual_tools`, `tool_trajectory_score`,
+`tool_trajectory_passed`); existing rows leave them null.
+
+The scaffold is validated by unit tests but **has not been run**. The runbook, the
+two-inference-run rationale (ADK evaluator vs RAGAS capture) and the exact commands are
+in [`evals/README.md`](evals/README.md).
+
 ## Phase 2 tools
 
 `lookup_record` returns one asset by id and never accepts SQL. `escalate` writes a
@@ -171,7 +183,7 @@ It calls Vertex AI and costs a few model tokens. The unit tests never do.
 | 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
 | 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | deployed for a five-day demo; live BigQuery and Cloud SQL |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
-| 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | not started |
+| 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | scaffolded: 8 cases, capture + RAGAS + BQ loader; not run |
 | 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | Terraform deploy and receipt done; Cloud Build step not added; teardown due 28 Nov 2026 |
 
 Deployment notes for phase 5: the service must run as a dedicated service account
