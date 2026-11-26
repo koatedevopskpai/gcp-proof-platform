@@ -15,7 +15,7 @@ eleven minutes so the portfolio keeps the proof without the bill.
 | Resource | Identifier |
 |---|---|
 | VM | `gcp-proof-platform-dev-app`, `e2-small`, `us-central1-a`, RUNNING, 30 GB `pd-balanced` |
-| Addresses | external `136.112.145.254`, internal `10.0.0.2` |
+| Addresses | external `<vm-public-ip>`, internal `10.0.0.2` |
 | VPC / subnet | `gcp-proof-platform-dev-vpc`, subnet `gcp-proof-platform-dev-app` `10.0.0.0/24`, private Google access |
 | Firewall | `tcp:3002,8010,8080` (app), `tcp:22` (SSH) — both from `0.0.0.0/0` as configured |
 | WIF pool | `github-pool`, provider `github-oidc`, issuer `token.actions.githubusercontent.com` |
@@ -28,7 +28,7 @@ eleven minutes so the portfolio keeps the proof without the bill.
 
 ## The proof it ran
 
-Captured at `2026-11-19T01:19:29Z`, `GET http://136.112.145.254:3002/health`:
+Captured at `2026-11-19T01:19:29Z`, `GET http://<vm-public-ip>:3002/health`:
 
 ```json
 {"status":"ok","services":[{"service":"http://rag-api:8000","status":"ok"},{"service":"http://dotnet-ingest:8080","status":"ok"}]}
