@@ -5,8 +5,8 @@ Google Cloud Platform engineering: Compute Engine, Cloud Run, BigQuery,
 Artifact Registry, Cloud Build CI/CD, optional GKE + Helm, all FinOps-labelled
 with **80% and 100% alerts** against a **$20/month budget**.
 
-Built to support a **GCP DevOps / Platform Engineer** application — the GCP-native
-companion to the AWS `ai-platform-proof` project.
+Built as an independent engineering portfolio project for GCP platform and DevOps engineering — the GCP-native
+companion to the AWS `ai-platform-proof` project. It is a reference implementation, not a client production system.
 
 ## Architecture
 
@@ -28,7 +28,7 @@ companion to the AWS `ai-platform-proof` project.
    └────────────────────────────────────────────────────────────┘
 ```
 
-## Capabilities demonstrated (maps to the target role)
+## Capabilities demonstrated
 
 | Requirement | Where |
 |---|---|
