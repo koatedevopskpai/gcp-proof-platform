@@ -13,7 +13,7 @@ services:
       finops.cost-center: cc-ai-mlops
       finops.workload: ai-platform-proof
       finops.environment: local-dev
-      finops.owner: koate.kpai@outlook.com
+      finops.owner: koatedevopskpai@outlook.com
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ai -d aiplatform"]
       interval: 5s
@@ -41,7 +41,7 @@ services:
       finops.cost-center: cc-ai-mlops
       finops.workload: ai-platform-proof
       finops.environment: local-dev
-      finops.owner: koate.kpai@outlook.com
+      finops.owner: koatedevopskpai@outlook.com
 
   dotnet-ingest:
     build: ./services/dotnet-ingest
@@ -58,7 +58,7 @@ services:
       finops.cost-center: cc-ai-mlops
       finops.workload: ai-platform-proof
       finops.environment: local-dev
-      finops.owner: koate.kpai@outlook.com
+      finops.owner: koatedevopskpai@outlook.com
 
   gateway:
     build: ./services/gateway
@@ -75,7 +75,7 @@ services:
       finops.cost-center: cc-ai-mlops
       finops.workload: ai-platform-proof
       finops.environment: local-dev
-      finops.owner: koate.kpai@outlook.com
+      finops.owner: koatedevopskpai@outlook.com
 
   evaluator:
     build: ./services/evaluator

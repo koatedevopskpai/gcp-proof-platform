@@ -202,5 +202,5 @@ variable "budget_limit_gbp" {
 
 variable "budget_alerts_email" {
   type    = string
-  default = "koatekpai@outlook.com"
+  default = "koatedevopskpai@outlook.com"
 }

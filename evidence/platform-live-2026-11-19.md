@@ -48,7 +48,7 @@ Your application is authenticating by using local Application Default Credential
 The billingbudgets.googleapis.com API requires a quota project, which is not set by default.
 ```
 
-Terraform was driven by a short-lived OAuth token for `koatekpai@outlook.com`; that service wants a
+Terraform was driven by a short-lived OAuth token for `<operator account>`; that service wants a
 quota project on the credential, which token auth does not carry. Everything else applied. The
 budget is the only piece of the config that has never been created, and it is still pending in the
 configuration for the next apply.
