@@ -190,7 +190,7 @@ variable "data_classification" {
 
 # --- Budget & cost guardrails ---
 variable "billing_account_id" {
-  description = "GCP billing account id (e.g. 01FBBE-ACD618-CFA5D6)"
+  description = "GCP billing account id (e.g. AAAAAA-BBBBBB-CCCCCC)"
   type        = string
 }
 
@@ -202,5 +202,5 @@ variable "budget_limit_gbp" {
 
 variable "budget_alerts_email" {
   type    = string
-  default = "koatekpai@outlook.com"
+  default = "koatedevopskpai@outlook.com"
 }

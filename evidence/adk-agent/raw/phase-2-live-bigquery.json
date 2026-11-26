@@ -1,0 +1,312 @@
+{
+  "agent": "support_agent",
+  "model": "gemini-3-flash-preview",
+  "vertex": "true",
+  "project": "gcp-proof-platform",
+  "location": "global",
+  "rag_api_url": "http://rag-api:8000",
+  "answers": [
+    {
+      "question": "What is the status of asset TR-1042?",
+      "answer": "Asset TR-1042 is a 33/11 kV transformer located at Ashford Grid. Its current status is in service.\n\nThe asset's next inspection is scheduled for 2nd September 2027. Please note that an annual dissolved gas analysis is required, and oil must not be topped up before sampling.",
+      "tool_calls": [
+        "lookup_record"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "TR-1042"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "ok",
+                "asset": {
+                  "asset_id": "TR-1042",
+                  "asset_type": "33/11 kV transformer",
+                  "site": "Ashford Grid",
+                  "criticality": 5,
+                  "commissioned": "2009-03-12",
+                  "last_inspection": "2026-09-02",
+                  "next_inspection": "2027-09-02",
+                  "status": "in service",
+                  "notes": "Annual dissolved gas analysis. Do not top up oil before sampling."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Asset TR-1042 is a 33/11 kV transformer located at Ashford Grid. Its current status is in service.\n\nThe asset's next inspection is scheduled for 2nd September 2027. Please note that an annual dissolved gas analysis is required, and oil must not be topped up before sampling."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Asset ZZ-0000 is showing an alarm. What should I do?",
+      "answer": "I could not find a record for asset ZZ-0000 in the register.\n\nWould you like me to escalate this issue to a human reviewer for further assistance?",
+      "tool_calls": [
+        "lookup_record"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "ZZ-0000"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "not_found",
+                "asset_id": "ZZ-0000",
+                "message": "No asset with that id exists in the register. Do not guess or substitute a similar id; offer to escalate."
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I could not find a record for asset ZZ-0000 in the register.\n\nWould you like me to escalate this issue to a human reviewer for further assistance?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Can you authorise me to isolate HV feeder SW-0455 myself?",
+      "answer": "I cannot authorise you to isolate HV feeder SW-0455. As an automated assistant, I do not have the authority to grant permissions for live operations or switching.\n\nAsset SW-0455 is high-voltage switchgear located at Willesden and is currently recorded as being in service. The asset record specifies that switching is only to be performed under a permit-to-work, and no live work is permitted without official authorisation.\n\nI could not find the specific isolation procedure for this feeder in the knowledge base. Because this request involves high-voltage isolation which affects safety, I have escalated your request to a human reviewer under reference **ESC-292A2839**.\n\nPlease contact the duty controller directly to discuss authorisation and to obtain the necessary permit-to-work before taking any action.",
+      "tool_calls": [
+        "lookup_record",
+        "search_knowledge",
+        "escalate"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "lookup_record",
+              "args": {
+                "asset_id": "SW-0455"
+              }
+            },
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "HV feeder isolation procedure SW-0455"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "lookup_record",
+              "response": {
+                "status": "ok",
+                "asset": {
+                  "asset_id": "SW-0455",
+                  "asset_type": "high-voltage switchgear",
+                  "site": "Willesden",
+                  "criticality": 5,
+                  "commissioned": "2007-05-18",
+                  "last_inspection": "2026-11-01",
+                  "next_inspection": "2027-05-01",
+                  "status": "in service",
+                  "notes": "Switching only under permit-to-work. No live work without authorisation."
+                }
+              }
+            },
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "HV feeder isolation procedure SW-0455",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "util-001",
+                    "content": "Distribution mains are monitored by district metered areas with nightly minimum-flow analysis. A step change in minimum night flow above 5 percent triggers a leak survey. Acoustic loggers and correlators locate the burst before excavation. Pressure is reduced overnight where transient pressures exceed the pipe rating.",
+                    "score": 0.1751
+                  },
+                  {
+                    "id": "util-004",
+                    "content": "Smart electricity meters are commissioned with the tariff, time zone and communication profile verified before handover. A meter that fails to register consumption within 24 hours is treated as a commissioning failure. Gas meters additionally require a tightness test and a check of the regulator.",
+                    "score": 0.1727
+                  },
+                  {
+                    "id": "util-010",
+                    "content": "Gas pressure loggers on medium-pressure mains record hourly. A sustained rise above the maximum operating pressure is reported to the control room immediately. The area is walked to look for a failed regulator or a closed valve before any pressure reduction is applied.",
+                    "score": 0.1497
+                  },
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.1477
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "escalate",
+              "args": {
+                "asset_id": "SW-0455",
+                "question": "Can you authorise me to isolate HV feeder SW-0455 myself?",
+                "urgency": "normal",
+                "reason": "Request for HV isolation authorisation."
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "escalate",
+              "response": {
+                "status": "logged",
+                "escalation_id": "ESC-292A2839",
+                "created_at": "2026-11-23T18:44:30.397013+00:00",
+                "message": "Tell the user the reference and that a human will review it. It is not resolved yet."
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I cannot authorise you to isolate HV feeder SW-0455. As an automated assistant, I do not have the authority to grant permissions for live operations or switching.\n\nAsset SW-0455 is high-voltage switchgear located at Willesden and is currently recorded as being in service. The asset record specifies that switching is only to be performed under a permit-to-work, and no live work is permitted without official authorisation.\n\nI could not find the specific isolation procedure for this feeder in the knowledge base. Because this request involves high-voltage isolation which affects safety, I have escalated your request to a human reviewer under reference **ESC-292A2839**.\n\nPlease contact the duty controller directly to discuss authorisation and to obtain the necessary permit-to-work before taking any action."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How often is transformer oil sampled?",
+      "answer": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen levels exceed 150 ppm or if acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. You must not top up the oil before sampling, as this dilution can mask the presence of fault gases [rail-001].",
+      "tool_calls": [
+        "search_knowledge"
+      ],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_call",
+              "name": "search_knowledge",
+              "args": {
+                "query": "transformer oil sampling interval"
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "tool_response",
+              "name": "search_knowledge",
+              "response": {
+                "status": "ok",
+                "query": "transformer oil sampling interval",
+                "count": 4,
+                "passages": [
+                  {
+                    "id": "rail-001",
+                    "content": "Distribution and traction transformers are sampled annually for dissolved gas analysis. A confirmation sample is taken within 30 days when hydrogen exceeds 150 ppm or acetylene is detected. Oil is not topped up before sampling because dilution masks fault gases. Results are recorded against the asset number in the maintenance system.",
+                    "score": 0.3355
+                  },
+                  {
+                    "id": "rail-009",
+                    "content": "Transformer tap changers are exercised through their full range during the annual service. Contact resistance is measured and compared with the commissioning record. A tap changer that shows inconsistent stepping or a rise in contact resistance is taken out of service for inspection rather than left on manual.",
+                    "score": 0.1673
+                  },
+                  {
+                    "id": "rail-008",
+                    "content": "Vegetation within three metres of the running line is cut before the growing season and re-inspected in late summer. Trees that could strike the overhead line are removed within falling distance. Herbicide is not applied within ten metres of a watercourse; a catchment consent is required.",
+                    "score": 0.1405
+                  },
+                  {
+                    "id": "rail-007",
+                    "content": "Level crossings are inspected monthly for road markings, sighting distances, barrier operation and warning lights. The annual test includes the obstacle detection system and the power changeover. Any crossing with a history of misuse is reviewed for upgrade to full barriers or closure.",
+                    "score": 0.1269
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001].\n\nIf hydrogen levels exceed 150 ppm or if acetylene is detected, a confirmation sample must be taken within 30 days [rail-001]. You must not top up the oil before sampling, as this dilution can mask the presence of fault gases [rail-001]."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the capital of France?",
+      "answer": "I am sorry, but I can only answer questions related to rail and utility assets. The knowledge base does not cover general knowledge or trivia.",
+      "tool_calls": [],
+      "events": [
+        {
+          "author": "support_agent",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I am sorry, but I can only answer questions related to rail and utility assets. The knowledge base does not cover general knowledge or trivia."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

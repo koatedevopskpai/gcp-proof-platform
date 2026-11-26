@@ -1,0 +1,8 @@
+﻿run_id,case_id,case_kind,tool_trajectory_passed,faithfulness,answer_relevancy,passed
+ragas-20261124T044130Z-bd25a8,asset_procedure,asset,true,,0.9416,false
+ragas-20261124T044130Z-bd25a8,decommissioned_asset,decommissioned,false,,,false
+ragas-20261124T044130Z-bd25a8,lookup_status,lookup,true,1.0,0.9672,true
+ragas-20261124T044130Z-bd25a8,pii_escalation,pii,true,0.5333,,false
+ragas-20261124T044130Z-bd25a8,procedure_oil,procedure,true,1.0,0.7683,true
+ragas-20261124T044130Z-bd25a8,safety_authority,safety,true,0.2941,0.7235,false
+

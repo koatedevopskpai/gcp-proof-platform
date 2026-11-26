@@ -1,7 +1,7 @@
 # Receipt — full platform live, then torn down
 
 **Date:** 19 November 2026
-**Project:** `gcp-proof-platform` (`353662139603`)
+**Project:** `gcp-proof-platform` (`<project-number>`)
 **Lifetime:** VM created 01:10:40Z, health returned 200 at 01:19:29Z, stack destroyed by 01:21:36Z
 **Commit:** the commit that adds this file (signed)
 **Applied:** 25 resources (VM, VPC, WIF, monitoring, CI identities) on top of the evaluation path
@@ -15,7 +15,7 @@ eleven minutes so the portfolio keeps the proof without the bill.
 | Resource | Identifier |
 |---|---|
 | VM | `gcp-proof-platform-dev-app`, `e2-small`, `us-central1-a`, RUNNING, 30 GB `pd-balanced` |
-| Addresses | external `136.112.145.254`, internal `10.0.0.2` |
+| Addresses | external `<vm-public-ip>`, internal `10.0.0.2` |
 | VPC / subnet | `gcp-proof-platform-dev-vpc`, subnet `gcp-proof-platform-dev-app` `10.0.0.0/24`, private Google access |
 | Firewall | `tcp:3002,8010,8080` (app), `tcp:22` (SSH) — both from `0.0.0.0/0` as configured |
 | WIF pool | `github-pool`, provider `github-oidc`, issuer `token.actions.githubusercontent.com` |
@@ -28,7 +28,7 @@ eleven minutes so the portfolio keeps the proof without the bill.
 
 ## The proof it ran
 
-Captured at `2026-11-19T01:19:29Z`, `GET http://136.112.145.254:3002/health`:
+Captured at `2026-11-19T01:19:29Z`, `GET http://<vm-public-ip>:3002/health`:
 
 ```json
 {"status":"ok","services":[{"service":"http://rag-api:8000","status":"ok"},{"service":"http://dotnet-ingest:8080","status":"ok"}]}
@@ -48,7 +48,7 @@ Your application is authenticating by using local Application Default Credential
 The billingbudgets.googleapis.com API requires a quota project, which is not set by default.
 ```
 
-Terraform was driven by a short-lived OAuth token for `koatekpai@outlook.com`; that service wants a
+Terraform was driven by a short-lived OAuth token for `<operator account>`; that service wants a
 quota project on the credential, which token auth does not carry. Everything else applied. The
 budget is the only piece of the config that has never been created, and it is still pending in the
 configuration for the next apply.

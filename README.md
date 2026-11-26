@@ -5,8 +5,8 @@ Google Cloud Platform engineering: Compute Engine, Cloud Run, BigQuery,
 Artifact Registry, Cloud Build CI/CD, optional GKE + Helm, all FinOps-labelled
 with **80% and 100% alerts** against a **$20/month budget**.
 
-Built to support a **GCP DevOps / Platform Engineer** application — the GCP-native
-companion to the AWS `ai-platform-proof` project.
+Built as an independent engineering portfolio project for GCP platform and DevOps engineering — the GCP-native
+companion to the AWS `ai-platform-proof` project. It is a reference implementation, not a client production system.
 
 ## Architecture
 
@@ -28,7 +28,7 @@ companion to the AWS `ai-platform-proof` project.
    └────────────────────────────────────────────────────────────┘
 ```
 
-## Capabilities demonstrated (maps to the target role)
+## Capabilities demonstrated
 
 | Requirement | Where |
 |---|---|
@@ -43,6 +43,7 @@ companion to the AWS `ai-platform-proof` project.
 | **Observability** | Availability **SLO**, error-budget alert, ops dashboard (`monitoring.tf`) |
 | **Data perimeter** | **VPC Service Controls** module, org-guarded (`vpcsc.tf`) |
 | **FinOps** | Every resource labelled (`cost_center`, `workload`, `budget_owner`, ...) + **$20/mo budget** with 80%/100% alerts |
+| **Grounded agent (five-day demo, separate from the always-on stack)** | ADK agent deployed keyless to Cloud Run (23–28 Nov 2026) with IAM-only access, private Cloud SQL + pgvector, and live BigQuery assets/escalations; phase-4 baseline: 6/8 exact tool trajectories, 8/8 final responses, 4/6 RAGAS faithfulness measured (`evidence/adk-agent`) |
 
 ## Cost model (us-central1, always-on)
 

@@ -4,15 +4,17 @@ from fastapi import FastAPI
 from sqlalchemy import text
 
 from app.api.routes import router
+from app.core.config import settings
 from app.core.db import Base, engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    with engine.connect() as conn:
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        conn.commit()
-    Base.metadata.create_all(bind=engine)
+    if settings.db_auto_init:
+        with engine.connect() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+            conn.commit()
+        Base.metadata.create_all(bind=engine)
     yield
 
 

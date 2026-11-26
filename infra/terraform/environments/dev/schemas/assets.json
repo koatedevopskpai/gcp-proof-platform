@@ -1,0 +1,11 @@
+[
+  {"name": "asset_id", "type": "STRING", "mode": "REQUIRED", "description": "Stable asset identifier, e.g. TR-1042"},
+  {"name": "asset_type", "type": "STRING", "mode": "REQUIRED", "description": "Asset class, e.g. 33/11 kV transformer"},
+  {"name": "site", "type": "STRING", "mode": "NULLABLE", "description": "Depot, grid site or works"},
+  {"name": "criticality", "type": "INTEGER", "mode": "NULLABLE", "description": "1 (low) to 5 (safety-critical)"},
+  {"name": "commissioned", "type": "DATE", "mode": "NULLABLE"},
+  {"name": "last_inspection", "type": "DATE", "mode": "NULLABLE"},
+  {"name": "next_inspection", "type": "DATE", "mode": "NULLABLE", "description": "Null for decommissioned assets"},
+  {"name": "status", "type": "STRING", "mode": "NULLABLE", "description": "in service | out of service | decommissioned"},
+  {"name": "notes", "type": "STRING", "mode": "NULLABLE", "description": "Short free-text note, not a procedure"}
+]

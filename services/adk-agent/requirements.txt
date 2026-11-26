@@ -1,0 +1,5 @@
+google-adk==2.15.*
+# google-genai (pulled in by adk) requires >=0.28.1; other services are independent images.
+httpx>=0.28.1,<1
+pydantic-settings==2.*
+google-cloud-bigquery==3.*

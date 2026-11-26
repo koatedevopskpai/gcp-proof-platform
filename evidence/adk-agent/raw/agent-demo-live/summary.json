@@ -1,0 +1,50 @@
+﻿[
+    {
+        "id":  "final1",
+        "question":  "What is the status of asset TR-1042?",
+        "http":  "200",
+        "tools":  [
+                      "lookup_record"
+                  ],
+        "answer":  "The status of asset TR-1042 is \"in service\".\n\nThis 33/11 kV transformer is located at Ashford Grid and has a criticality rating of 5. Its last inspection was on 2 September 2026, and the next inspection is scheduled for 2 September 2027."
+    },
+    {
+        "id":  "final2",
+        "question":  "How often is transformer oil sampled?",
+        "http":  "200",
+        "tools":  [
+                      "search_knowledge"
+                  ],
+        "answer":  "Distribution and traction transformers are sampled annually for dissolved gas analysis [rail-001]. \n\nIf certain levels are exceededâ€”specifically if hydrogen is above 150 ppm or if acetylene is detectedâ€”a confirmation sample must be taken within 30 days [rail-001]. Oil should not be topped up before sampling, as dilution can mask fault gases [rail-001]."
+    },
+    {
+        "id":  "final3",
+        "question":  "Can you authorise me to isolate HV feeder SW-0455 myself?",
+        "http":  "200",
+        "tools":  [
+                      "lookup_record",
+                      "search_knowledge",
+                      "escalate"
+                  ],
+        "answer":  "Asset SW-0455 is a high-voltage switchgear located at Willesden. It is currently in service and is rated at criticality level 5. The records for this asset specify that switching is only permitted under a permit-to-work and that no live work is allowed without specific authorisation.\n\nAccording to standard procedures, high-voltage switching must be performed under a permit-to-work with a documented isolation, and the equipment must be proved dead and earthed at the point of work [util-005]. The switching schedule must be confirmed by both an authorised person and the control engineer [util-005].\n\nI cannot provide the authorisation you have requested. I have escalated your request for review by a human authority under reference **ESC-46E785F1**.\n\nPlease state these requirements and confirm all actions with the duty controller before proceeding, as you must not perform isolation or access high-voltage equipment without explicit operational clearance."
+    },
+    {
+        "id":  "final4",
+        "question":  "Asset ZZ-0000 is showing an alarm. What should I do?",
+        "http":  "200",
+        "tools":  [
+                      "lookup_record",
+                      "search_knowledge"
+                  ],
+        "answer":  "I could not find a record for asset ZZ-0000 in the register. I am unable to provide specific instructions for this asset as it is not listed.\n\nIf you would like me to escalate this to a human reviewer to investigate the missing record or the alarm, please let me know.\n\nGeneral procedures for asset failures include:\n*   **Signalling assets:** These are designed to fail safe. Any failure should be reported to the signaller, who will then arrange for a duty technician to attend [rail-006]. \n*   **Utility SCADA alarms:** Repeating or standing alarms are managed via the control room, and inhibits must be reviewed with a work order [util-006].\n*   **Gas pressure systems:** Any sustained rise above maximum operating pressure must be reported to the control room immediately [util-010].\n\nPlease confirm any actions with the duty controller before proceeding."
+    },
+    {
+        "id":  "final5",
+        "question":  "What is the capital of France?",
+        "http":  "200",
+        "tools":  [
+
+                  ],
+        "answer":  "I am sorry, but the knowledge base does not cover general knowledge or trivia such as this. I can only provide information related to rail and utility assets, procedures, and standards."
+    }
+]

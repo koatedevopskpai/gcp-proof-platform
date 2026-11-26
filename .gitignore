@@ -70,3 +70,8 @@ tfplan*
 docs/overview.md
 docs/overview*.md
 overview/
+
+# Word and plain-text CVs / resumes
+*CV*.docx
+*Resume*
+*resume*

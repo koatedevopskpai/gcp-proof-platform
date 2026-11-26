@@ -12,5 +12,10 @@
   { "name": "case_id", "type": "STRING", "mode": "NULLABLE" },
   { "name": "judge_model", "type": "STRING", "mode": "NULLABLE" },
   { "name": "trace_uri", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "report_only", "type": "BOOL", "mode": "NULLABLE" }
+  { "name": "report_only", "type": "BOOL", "mode": "NULLABLE" },
+  { "name": "case_kind", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "expected_tools", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "actual_tools", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "tool_trajectory_score", "type": "FLOAT", "mode": "NULLABLE" },
+  { "name": "tool_trajectory_passed", "type": "BOOL", "mode": "NULLABLE" }
 ]

@@ -16,6 +16,7 @@ migrating to the collections API should be one deliberate change against a later
 """
 from __future__ import annotations
 
+import os
 import time
 from typing import Sequence
 
@@ -69,12 +70,30 @@ def build_metrics():
         faithfulness,
     )
 
+    available = {
+        "faithfulness": faithfulness,
+        "answer_relevancy": answer_relevancy,
+        "context_precision": context_precision,
+        "context_recall": context_recall,
+        "answer_correctness": answer_correctness,
+    }
+    # RAGAS can lose whole metrics to executor timeouts when the judge is slow.
+    # Callers may run a narrower baseline; the default keeps all five.
+    selected = [
+        name.strip()
+        for name in os.getenv("RAGAS_METRICS", ",".join(available)).split(",")
+        if name.strip()
+    ]
+    unknown = [name for name in selected if name not in available]
+    if unknown:
+        raise ValueError(f"unknown RAGAS metrics: {', '.join(unknown)}")
+
     # answer_relevancy normally generates `strictness` candidates and averages them. The LangChain
     # wrapper returns one generation, so ragas warns and silently scores one sample. Setting it to
     # 1 states what actually happens.
     answer_relevancy.strictness = 1
 
-    return [faithfulness, answer_relevancy, context_precision, context_recall, answer_correctness]
+    return [available[name] for name in selected]
 
 
 def score(
@@ -88,13 +107,14 @@ def score(
     project: str | None = None,
     location: str | None = None,
     embedding_location: str | None = None,
+    raise_exceptions: bool = False,
 ) -> dict:
     """Score rows of {case_id, question, contexts, answer, reference}.
 
     Missing metrics are null rather than omitted, so a column that disappears after a version bump
     is visible instead of quietly absent.
     """
-    from ragas import EvaluationDataset, SingleTurnSample, evaluate
+    from ragas import EvaluationDataset, RunConfig, SingleTurnSample, evaluate
 
     started = time.time()
     samples = [
@@ -107,6 +127,15 @@ def score(
         for row in rows
     ]
     dataset = EvaluationDataset(samples=samples)
+
+    # RAGAS defaults to 16 workers and a 180s executor timeout. A slow-but-valid
+    # judge call (or a rate-limited Vertex endpoint) then loses whole metrics.
+    # Keep the original defaults unless a caller asks for a gentler run.
+    run_config = RunConfig(
+        timeout=int(os.getenv("RAGAS_TIMEOUT", "180")),
+        max_workers=int(os.getenv("RAGAS_MAX_WORKERS", "16")),
+        max_retries=int(os.getenv("RAGAS_MAX_RETRIES", "10")),
+    )
 
     llm, embeddings = build_adapters(
         judge_model, judge_base_url, judge_api_key, embedding_model,
@@ -121,7 +150,8 @@ def score(
 
         with get_openai_callback() as callback:
             result = evaluate(dataset, metrics=metrics, llm=llm, embeddings=embeddings,
-                              raise_exceptions=False, show_progress=False)
+                              raise_exceptions=raise_exceptions, show_progress=False,
+                              run_config=run_config)
         usage = {
             "prompt_tokens": callback.prompt_tokens,
             "completion_tokens": callback.completion_tokens,
@@ -131,7 +161,8 @@ def score(
         }
     except ImportError:
         result = evaluate(dataset, metrics=metrics, llm=llm, embeddings=embeddings,
-                          raise_exceptions=False, show_progress=False)
+                          raise_exceptions=raise_exceptions, show_progress=False,
+                          run_config=run_config)
         usage = None
 
     frame = result.to_pandas()

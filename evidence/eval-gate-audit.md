@@ -184,7 +184,7 @@ in front of a build.
 ## Reproduce
 
 ```sh
-cd C:/Users/koate/development/gcp-proof-platform
+cd <repo root>
 
 # lexical arm (the deployed configuration)
 docker run --rm -v "$PWD:/src" -w /src/services/evaluator python:3.12-slim \
