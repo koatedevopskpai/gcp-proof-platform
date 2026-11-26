@@ -1,7 +1,7 @@
 # Receipt — full platform live, then torn down
 
 **Date:** 19 November 2026
-**Project:** `gcp-proof-platform` (`353662139603`)
+**Project:** `gcp-proof-platform` (`<project-number>`)
 **Lifetime:** VM created 01:10:40Z, health returned 200 at 01:19:29Z, stack destroyed by 01:21:36Z
 **Commit:** the commit that adds this file (signed)
 **Applied:** 25 resources (VM, VPC, WIF, monitoring, CI identities) on top of the evaluation path

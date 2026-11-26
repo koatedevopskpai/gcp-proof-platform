@@ -1,7 +1,7 @@
 # Receipt — evaluation pipeline running on GCP
 
 **Date:** 19 November 2026
-**Project:** `gcp-proof-platform` (number `353662139603`)
+**Project:** `gcp-proof-platform` (number `<project-number>`)
 **Execution:** `eval-to-bq-lqzl7`, 00:57:54Z → 01:00:37Z (163 s), succeeded
 **Image:** `us-central1-docker.pkg.dev/gcp-proof-platform/ai-platform/eval-to-bq@sha256:c3004f0c…`
 **Code:** branch `phase-3/gcp-integration`, `d1e1b51` plus the `google-cloud-storage` dependency

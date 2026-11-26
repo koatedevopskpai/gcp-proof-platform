@@ -1,5 +1,5 @@
 project_id        = "gcp-proof-platform"
-billing_account_id = "01FBBE-ACD618-CFA5D6"
+billing_account_id = "AAAAAA-BBBBBB-CCCCCC"
 region            = "us-central1"
 zone              = "us-central1-a"
 environment       = "dev"
