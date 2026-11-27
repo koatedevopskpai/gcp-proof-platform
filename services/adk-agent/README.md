@@ -130,14 +130,20 @@ The baseline ran on 24 November 2026:
 - **BigQuery:** `ai_platform.eval_reports`, run `ragas-20261124T044130Z-bd25a8`,
   6 rows with the trajectory columns populated.
 
-The useful failures are extra `search_knowledge` calls after a lookup miss or a
-decommissioned asset, and low faithfulness on the safety/authorisation answers
-(0.2941 and 0.5333) where the model adds advice the retrieved passage does not
-support.
+The 27 November prompt fix removed the two over-calls (**8/8 exact**, 8/8 final
+responses) and improved safety faithfulness from **0.2941 to 0.6923** and PII from
+**0.5333 to 0.6000**. Both remain below the 0.70 threshold; the next tightening should
+shorten the refusal. BigQuery run `ragas-20261127T031656Z-7364c9`.
+
+The useful baseline failures were extra `search_knowledge` calls after a lookup miss
+or a decommissioned asset, and low faithfulness on the safety/authorisation answers
+where the model added advice the retrieved passage did not support.
 
 Runbook, the per-case Cloud Run scoring path and the caveats are in
-[`evals/README.md`](evals/README.md); the receipt is
-[`evidence/adk-agent/2026-11-24-phase4-baseline.md`](../../evidence/adk-agent/2026-11-24-phase4-baseline.md).
+[`evals/README.md`](evals/README.md); the receipts are
+[`evidence/adk-agent/2026-11-24-phase4-baseline.md`](../../evidence/adk-agent/2026-11-24-phase4-baseline.md)
+and
+[`evidence/adk-agent/2026-11-27-phase4-promptfix.md`](../../evidence/adk-agent/2026-11-27-phase4-promptfix.md).
 
 ## Phase 2 tools
 
@@ -190,7 +196,7 @@ It calls Vertex AI and costs a few model tokens. The unit tests never do.
 | 1b | Seed rail/utility corpus and ingest it | 19 synthetic documents; mock and Vertex runs recorded |
 | 2 | `lookup_record` (BigQuery, read-only) and an `escalate` tool that raises a HITL flag | deployed for a five-day demo; live BigQuery and Cloud SQL |
 | 3 | Router + retriever/responder sub-agents, only if phase 1 evaluation shows a need | not started |
-| 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | baseline recorded 24 Nov: 6/8 exact trajectories, 8/8 final responses; RAGAS 4/6 measured |
+| 4 | ADK trajectory evals, plus the existing RAGAS/Vertex arm, rows into `ai_platform.eval_reports` | baseline 24 Nov + prompt fix 27 Nov: 8/8 exact trajectories; safety faithfulness 0.6923, PII 0.6; still below threshold |
 | 5 | Terraform + Cloud Build deploy to Cloud Run, receipt, teardown | Terraform deploy and receipt done; Cloud Build step not added; teardown due 28 Nov 2026 |
 
 Deployment notes for phase 5: the service must run as a dedicated service account

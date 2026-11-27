@@ -7,7 +7,7 @@ COPY services/evaluator/evaluator /app/evaluator
 
 COPY services/adk-agent/eval_support.py /app/eval_support.py
 COPY services/adk-agent/evals/phase4_cloud_score.py /app/phase4_cloud_score.py
-COPY services/adk-agent/artifacts/phase4/captured-ragas.jsonl /app/phase4/captured.jsonl
+COPY services/adk-agent/artifacts/phase4/captured.jsonl /app/phase4/captured.jsonl
 COPY services/adk-agent/artifacts/phase4/trajectory.json /app/phase4/trajectory.json
 
 ENTRYPOINT ["python", "/app/phase4_cloud_score.py"]

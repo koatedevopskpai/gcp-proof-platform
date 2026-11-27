@@ -71,7 +71,8 @@ def build_lookup_record(repository: AssetRepository) -> Callable[[str], dict]:
                 "asset_id": asset_id,
                 "message": (
                     "No asset with that id exists in the register. Do not guess or "
-                    "substitute a similar id; offer to escalate."
+                    "substitute a similar id, and do not call search_knowledge for "
+                    "this asset; offer to escalate."
                 ),
             }
 
