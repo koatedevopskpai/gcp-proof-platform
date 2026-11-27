@@ -37,6 +37,8 @@ def main() -> None:
         for line in DATASET.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+    # RAGAS cannot score a case with no retrieved contexts (not-found, out-of-domain).
+    rows = [row for row in rows if row.get("contexts")]
     selected = [
         value.strip()
         for value in os.getenv("PHASE4_CASE_IDS", "").split(",")

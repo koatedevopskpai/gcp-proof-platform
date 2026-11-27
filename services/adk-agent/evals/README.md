@@ -1,9 +1,12 @@
 # Phase 4 - evaluation
 
-**Status:** baseline recorded 24 November 2026. ADK trajectory: **6/8 exact, 8/8 final
-responses**. RAGAS/Vertex: **4/6 faithfulness measured (mean 0.7068), 4/6 answer
-relevancy measured (mean 0.8502)**; two cases were unmeasured after judge timeouts.
-Receipt: [`evidence/adk-agent/2026-11-24-phase4-baseline.md`](../../../evidence/adk-agent/2026-11-24-phase4-baseline.md).
+**Status:** baseline recorded 24 November 2026; prompt fix recorded 27 November 2026.
+ADK trajectory: **8/8 exact after the prompt fix** (6/8 before), **8/8 final
+responses**. RAGAS/Vertex targeted safety pass: **safety faithfulness 0.6923, PII
+0.6000**, still below the 0.70 threshold. Receipts:
+[`2026-11-24-phase4-baseline.md`](../../../evidence/adk-agent/2026-11-24-phase4-baseline.md)
+and
+[`2026-11-27-phase4-promptfix.md`](../../../evidence/adk-agent/2026-11-27-phase4-promptfix.md).
 
 Phase 4 answers two separate questions:
 
@@ -196,6 +199,26 @@ The useful findings:
   unmeasured, not zero. The two `0.0` relevancy values in the raw report were
   corrected to `NULL` in BigQuery.
 
+## Prompt fix (27 November 2026)
+
+Two prompt rules changed: a definitive `not_found` ends the lookup, and a
+`decommissioned`/`out of service` record does not get a live procedure. Safety answers
+may now use only claims present in the retrieved passages.
+
+| Case | Baseline faith | Prompt-fix faith | Change |
+|---|---|---|---|
+| `safety_authority` | 0.2941 | **0.6923** | +0.3982 |
+| `pii_escalation` | 0.5333 | **0.6000** | +0.0667 |
+
+ADK trajectory moved from 6/8 to **8/8 exact**; final responses remained 8/8. Both
+safety cases are still below the 0.70 threshold, so this is an improvement, not a
+pass. The next tightening should shorten the refusal: one source sentence, the
+hand-off, and nothing else.
+
+The first targeted pass ran both metrics at 600s per case and timed out; that run was
+deleted. The result above is a faithfulness-only pass at 900s per case
+(`ragas-20261127T031656Z-7364c9`). Answer relevancy was not rerun.
+
 ## Baseline findings
 
 The live smoke run showed the model sometimes adds `search_knowledge` after a
@@ -220,10 +243,11 @@ capture JSONL under `artifacts/phase4/` and copy the evidence into
 - Latency and cost per case beyond what the ADK result reports.
 - Multi-turn conversations. The eval set is single-turn; the escalation flow may need
   a confirming follow-up, which is phase 4b.
-- Two of the six RAGAS cases (one faithfulness, two relevancy values) were unmeasured
-  after judge timeouts. The baseline used **faithfulness and answer relevancy only**;
-  context precision, context recall and answer correctness are available in the
-  evaluator but were not part of this run.
+- Two of the six baseline RAGAS cases (one faithfulness, two relevancy values) were
+  unmeasured after judge timeouts. The baseline used **faithfulness and answer
+  relevancy only**; context precision, context recall and answer correctness are
+  available in the evaluator but were not part of this run.
+- The prompt-fix pass measured **faithfulness only**; answer relevancy was not rerun.
 - Production safety: the corpus and assets are synthetic; this is a prototype.
 
 ## Feedback loop
