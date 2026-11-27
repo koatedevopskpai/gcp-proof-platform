@@ -51,3 +51,26 @@ resource "google_bigquery_table" "agent_escalations" {
   deletion_protection = false
   schema              = file("${path.module}/schemas/agent_escalations.json")
 }
+
+# -----------------------------------------------------------------------------
+# Permanent evaluation assets.
+#
+# The five-day demo's agent_demo_data dataset is temporary. Phase-4 re-runs need
+# the same seven asset rows after teardown, so keep a permanent copy in the dev
+# environment.
+# -----------------------------------------------------------------------------
+
+resource "google_bigquery_dataset" "agent_eval_data" {
+  dataset_id = "agent_eval_data"
+  location   = var.bq_location
+  labels = {
+    workload = var.workload
+  }
+}
+
+resource "google_bigquery_table" "agent_eval_assets" {
+  dataset_id          = google_bigquery_dataset.agent_eval_data.dataset_id
+  table_id            = "assets"
+  deletion_protection = false
+  schema              = file("${path.module}/schemas/assets.json")
+}

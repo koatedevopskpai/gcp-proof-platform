@@ -51,9 +51,10 @@ probabilistic. Record both; do not reconcile them by hand.
   docker compose up -d postgres rag-api
   python services/rag-api/scripts/ingest_corpus.py --url http://localhost:8010
   ```
-- Asset rows in the dataset the capture will read. While the five-day demo is up,
-  `agent_demo_data.assets` has them. **Before destroying the demo**, either run phase 4
-  or seed a permanent `agent_eval_data` dataset and set `ASSETS_DATASET` to it.
+- Asset rows in the dataset the capture will read. The five-day demo's
+  `agent_demo_data.assets` is available until 28 November; the permanent
+  `agent_eval_data.assets` (7 rows, seeded 27 November) is the dataset to use after
+  teardown. Set `ASSETS_DATASET` accordingly.
 
 The rail/utilities corpus is synthetic; these scores are a prototype measurement, not a
 benchmark.
@@ -70,7 +71,7 @@ $env:GOOGLE_CLOUD_LOCATION     = "global"
 # live BQ assets, local retrieval, no HITL rows in BigQuery
 $env:ASSETS_SOURCE      = "bigquery"
 $env:BQ_PROJECT         = "gcp-proof-platform"
-$env:ASSETS_DATASET     = "agent_demo_data"
+$env:ASSETS_DATASET     = "agent_eval_data"   # agent_demo_data only while the demo is up
 $env:ESCALATION_SINK    = "file"
 $env:ESCALATION_FILE    = "artifacts/phase4/escalations.jsonl"
 $env:RAG_API_URL        = "http://localhost:8010"
