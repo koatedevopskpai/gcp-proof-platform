@@ -50,8 +50,10 @@ destroyed with the demo.
 
 ## Teardown
 
-Unchanged: **28 November 2026, 06:00**, via `scripts/agent-demo-down.ps1` or the
-desktop reminder. This handoff does not keep the demo alive.
+**Completed 28 November 2026.** The demo compute, database, datasets, secrets, service
+accounts, VPC, jobs and demo images are gone. The permanent `agent_eval_data.assets`
+dataset remains with seven rows. See
+[`2026-11-28-demo-teardown.md`](2026-11-28-demo-teardown.md).
 
 ## Cost
 

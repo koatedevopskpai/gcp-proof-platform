@@ -98,11 +98,14 @@ pytest -q
 | `ASSETS_DATASET` / `ASSETS_TABLE` | default `agent_data` / `assets` |
 | `ESCALATIONS_DATASET` / `ESCALATIONS_TABLE` | default `agent_ops` / `agent_escalations` |
 
-## Live demo (five days)
+## Live demo (five days, torn down)
 
-Deployed on 23 November 2026 and scheduled for destruction on **28 November 2026**.
-The Terraform root is `infra/terraform/environments/agent-demo`; it is isolated from
-the `dev` environment and has its own state.
+Deployed on 23 November 2026 and **destroyed on 28 November 2026**. The resources below
+no longer exist; this section is retained as a record. Teardown evidence is in
+[`evidence/adk-agent/2026-11-28-demo-teardown.md`](../../evidence/adk-agent/2026-11-28-demo-teardown.md).
+
+The Terraform root was `infra/terraform/environments/agent-demo`; it was isolated from
+the `dev` environment and had its own state.
 
 - `agent-demo-adk`: Cloud Run agent, IAM only, max one instance (in-memory sessions).
 - `agent-demo-rag-api`: Cloud Run retrieval, IAM only; the agent service account is

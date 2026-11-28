@@ -2,9 +2,10 @@
 # but requires IAM; rag-api is reachable only by the agent's service account.
 
 resource "google_cloud_run_v2_service" "rag" {
-  name     = "agent-demo-rag-api"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  name                = "agent-demo-rag-api"
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
 
   template {
     service_account = google_service_account.rag.email
@@ -97,9 +98,10 @@ resource "google_cloud_run_v2_service" "rag" {
 }
 
 resource "google_cloud_run_v2_service" "agent" {
-  name     = "agent-demo-adk"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  name                = "agent-demo-adk"
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
 
   template {
     service_account = google_service_account.agent.email
@@ -192,8 +194,9 @@ resource "google_cloud_run_v2_service_iam_member" "rag_invoker" {
 # One-off schema/seed job. It runs as the admin DB user, creates pgvector and the
 # documents table, grants CRUD to the app user, then embeds and inserts the corpus.
 resource "google_cloud_run_v2_job" "seed" {
-  name     = "agent-demo-seed"
-  location = var.region
+  name                = "agent-demo-seed"
+  location            = var.region
+  deletion_protection = false
 
   template {
     template {

@@ -23,4 +23,17 @@ if (-not $Force) {
     }
 }
 
-terraform -chdir=$tfDir destroy -auto-approve
+$previousPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+
+try {
+    terraform "-chdir=$tfDir" destroy -auto-approve
+    $exitCode = $LASTEXITCODE
+}
+finally {
+    $ErrorActionPreference = $previousPreference
+}
+
+if ($exitCode -ne 0) {
+    throw "terraform destroy failed with exit code $exitCode"
+}
